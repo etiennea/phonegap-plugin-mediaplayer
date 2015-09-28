@@ -28,3 +28,5 @@ var MediaPlayer = {
     }
 
 };
+
+module.exports = MediaPlayer;
