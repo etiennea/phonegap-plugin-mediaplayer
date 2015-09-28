@@ -12,28 +12,13 @@
 
 @implementation GBAudioPlayer
 
-
 - (id) init{
-	self = [super init];
+    self = [super init];
     
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     [[AVAudioSession sharedInstance] setActive: YES error: nil];
     
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
- 
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    
-    NSError *setCategoryError = nil;
-    if (![session setCategory:AVAudioSessionCategoryPlayback
-                  withOptions:AVAudioSessionCategoryOptionMixWithOthers
-                        error:&setCategoryError]) {
-        // handle error
-    }
-    
-    //UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-    //AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (sessionCategory), &sessionCategory);
-    //AudioSessionSetActive(true);
-    
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinish) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     
@@ -43,12 +28,17 @@
     player.volume = 1.0f;
     [player addObserver:self forKeyPath:@"status" options:0 context:nil];
     
-	return self;
+    return self;
 }
 
 -(void)didFinish{
     NSLog(@"did finish");
+    if (player != nil)
+        [player.currentItem removeObserver:self forKeyPath:@"status"];
+    [player removeObserver:self forKeyPath:@"status"];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_delegate didFinishPlayingSong];
+ 
     //   [self play];
 }
 
@@ -58,7 +48,7 @@
     NSURL *url=[NSURL URLWithString:urlString];
     
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
-
+    
     AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
     [playerItem addObserver:self forKeyPath:@"status" options:0 context:nil];
     [player insertItem:playerItem afterItem:nil];
@@ -67,15 +57,15 @@
 -(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName{
     NSLog(@"url:%@",urlString);
     
-    //MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:[UIImage imageNamed:@"https://voicepolls.com/network/img/logo.png"]];
+    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://voicepolls.com/network/img/logo.png"]]];
+    
+    MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:image];
     NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: songTitle,
                                  MPMediaItemPropertyArtist: artistName,
                                  MPMediaItemPropertyAlbumTitle: albumTitle,
-                                 //MPMediaItemPropertyArtwork: artwork
-                             };
+                                 MPMediaItemPropertyArtwork: artwork};
     
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
-    
     [player removeAllItems];
     [self addNextURLWithString:urlString];
     [self play];
@@ -84,7 +74,7 @@
 -(void)play{
     
     [player play];
-
+    
     
 }
 
@@ -126,55 +116,55 @@
 {
     switch (st) {
         case kAudioFileUnspecifiedError:
-            return @"kAudioFileUnspecifiedError";
-            
+        return @"kAudioFileUnspecifiedError";
+        
         case kAudioFileUnsupportedFileTypeError:
-            return @"kAudioFileUnsupportedFileTypeError";
-            
+        return @"kAudioFileUnsupportedFileTypeError";
+        
         case kAudioFileUnsupportedDataFormatError:
-            return @"kAudioFileUnsupportedDataFormatError";
-            
+        return @"kAudioFileUnsupportedDataFormatError";
+        
         case kAudioFileUnsupportedPropertyError:
-            return @"kAudioFileUnsupportedPropertyError";
-            
+        return @"kAudioFileUnsupportedPropertyError";
+        
         case kAudioFileBadPropertySizeError:
-            return @"kAudioFileBadPropertySizeError";
-            
+        return @"kAudioFileBadPropertySizeError";
+        
         case kAudioFilePermissionsError:
-            return @"kAudioFilePermissionsError";
-            
+        return @"kAudioFilePermissionsError";
+        
         case kAudioFileNotOptimizedError:
-            return @"kAudioFileNotOptimizedError";
-            
+        return @"kAudioFileNotOptimizedError";
+        
         case kAudioFileInvalidChunkError:
-            return @"kAudioFileInvalidChunkError";
-            
+        return @"kAudioFileInvalidChunkError";
+        
         case kAudioFileDoesNotAllow64BitDataSizeError:
-            return @"kAudioFileDoesNotAllow64BitDataSizeError";
-            
+        return @"kAudioFileDoesNotAllow64BitDataSizeError";
+        
         case kAudioFileInvalidPacketOffsetError:
-            return @"kAudioFileInvalidPacketOffsetError";
-            
+        return @"kAudioFileInvalidPacketOffsetError";
+        
         case kAudioFileInvalidFileError:
-            return @"kAudioFileInvalidFileError";
-            
+        return @"kAudioFileInvalidFileError";
+        
         case kAudioFileOperationNotSupportedError:
-            return @"kAudioFileOperationNotSupportedError";
-            
+        return @"kAudioFileOperationNotSupportedError";
+        
         case kAudioFileNotOpenError:
-            return @"kAudioFileNotOpenError";
-            
+        return @"kAudioFileNotOpenError";
+        
         case kAudioFileEndOfFileError:
-            return @"kAudioFileEndOfFileError";
-            
+        return @"kAudioFileEndOfFileError";
+        
         case kAudioFilePositionError:
-            return @"kAudioFilePositionError";
-            
+        return @"kAudioFilePositionError";
+        
         case kAudioFileFileNotFoundError:
-            return @"kAudioFileFileNotFoundError";
-            
+        return @"kAudioFileFileNotFoundError";
+        
         default:
-            return @"unknown error";
+        return @"unknown error";
     }
 }
 
