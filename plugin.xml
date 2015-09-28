@@ -18,6 +18,8 @@
     <platform name="ios">
         <source-file src="src/ios/MediaPlayer.m" />
         <header-file src="src/ios/MediaPlayer.h" />
+        <source-file src="src/ios/GBBackgroundAudioPlayer.m" />
+        <header-file src="src/ios/GBBackgroundAudioPlayer.h" />
         <!--         <source-file src="src/ios/SSZipArchive.m" target-dir="minizip" />
         <header-file src="src/ios/SSZipArchive.h" target-dir="minizip" /> -->
         <config-file target="config.xml" parent="/*">
