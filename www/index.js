@@ -25,6 +25,9 @@ var MediaPlayer = {
     },
     playNext: function(success, failure) {
         exec(success, failure, "MediaPlayer", "playNext", []);
+    },
+    ended: function() {
+        console.log('Playlist ended')
     }
 
 };

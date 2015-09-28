@@ -31,5 +31,12 @@
         <framework src="CoreAudio.framework" />
         <framework src="MediaPlayer.framework" />
         <framework src="AudioToolbox.framework" />
-    </platform>
+
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+           <array>
+               <string>audio</string>
+           </array>
+       </config-file>
+       
+   </platform>
 </plugin>

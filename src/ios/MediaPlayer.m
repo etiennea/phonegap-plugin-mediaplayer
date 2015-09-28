@@ -24,7 +24,7 @@
 
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
-                audioPlayer.delegate = self;
+        audioPlayer.delegate = self;
     }
     NSString* urlString;
     NSString* songTitle;
@@ -56,9 +56,9 @@
 
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
-                audioPlayer.delegate = self;
+        audioPlayer.delegate = self;
     }
-     [audioPlayer pause];
+    [audioPlayer pause];
 }
 
 -(void)addNextURL:(CDVInvokedUrlCommand*)command{
@@ -66,7 +66,7 @@
 
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
-                audioPlayer.delegate = self;
+        audioPlayer.delegate = self;
     }
     NSString* urlString = [command.arguments objectAtIndex:0];
     [audioPlayer addNextURLWithString:urlString];
@@ -79,14 +79,14 @@
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
     }
-     [audioPlayer play];
+    [audioPlayer play];
     
 }
 
 -(void)didFinishPlayingSong{
     NSLog(@"didFinishPlayingSong");
 
-     [self.webView stringByEvaluatingJavaScriptFromString:@"ended()"];
+    [self.webView stringByEvaluatingJavaScriptFromString:@"window.MediaPlayer.ended()"];
 }
 
 @end

@@ -67,11 +67,12 @@
 -(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName{
     NSLog(@"url:%@",urlString);
     
-    MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:[UIImage imageNamed:@"IMG_2414.jpg"]];
+    //MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:[UIImage imageNamed:@"https://voicepolls.com/network/img/logo.png"]];
     NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: songTitle,
                                  MPMediaItemPropertyArtist: artistName,
                                  MPMediaItemPropertyAlbumTitle: albumTitle,
-                                 MPMediaItemPropertyArtwork: artwork};
+                                 //MPMediaItemPropertyArtwork: artwork
+                             };
     
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
     
