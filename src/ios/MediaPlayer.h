@@ -8,12 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
-#import "CDVPlugin.h"
-#import "GBAudioPlayer.h"
+#import "GBBackgroundAudioPlayer.h"
 
 
 
-@interface AudioPlayer : CDVPlugin <GBAudioPlayerDelegate>{
+@interface MediaPlayer : CDVPlugin <GBAudioPlayerDelegate>{
     GBAudioPlayer* audioPlayer;
 }
 

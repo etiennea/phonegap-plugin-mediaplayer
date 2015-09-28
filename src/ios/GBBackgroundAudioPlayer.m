@@ -2,11 +2,11 @@
 //  GBBackgroundAudioPlayer.m
 //  audioplayer
 //
-//  Created by Vadim Fainshtein on 1/16/14.
-//  Copyright (c) 2014 GlobalBit. All rights reserved.
+//  Initially created by Vadim Fainshtein on 1/16/14.
+//  Modified by Etienne Adriaenssen
 //
 
-#import "GBAudioPlayer.h"
+#import "GBBackgroundAudioPlayer.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
@@ -21,9 +21,18 @@
     
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
  
-    UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-    AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (sessionCategory), &sessionCategory);
-    AudioSessionSetActive(true);
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    
+    NSError *setCategoryError = nil;
+    if (![session setCategory:AVAudioSessionCategoryPlayback
+                  withOptions:AVAudioSessionCategoryOptionMixWithOthers
+                        error:&setCategoryError]) {
+        // handle error
+    }
+    
+    //UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
+    //AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (sessionCategory), &sessionCategory);
+    //AudioSessionSetActive(true);
     
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinish) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
@@ -83,12 +92,12 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    NSLog(@"observer player:%d",player.status);
-    NSLog(@"observer playeritem:%d",player.currentItem.status);
+    NSLog(@"observer player:%ld",(long)player.status);
+    NSLog(@"observer playeritem:%ld",(long)player.currentItem.status);
     
     if (object == player && [keyPath isEqualToString:@"status"]) {
         if (player.status == AVPlayerStatusReadyToPlay) {
-            NSLog(@"player status:%d",player.status);
+            NSLog(@"player status:%ld",(long)player.status);
             
         } else if (player.status == AVPlayerStatusFailed) {
             NSLog(@"AVPlayerStatusFailed");
@@ -96,7 +105,7 @@
     } else  if ([object isKindOfClass:[AVPlayerItem class]] && [keyPath isEqualToString:@"status"]) {
         if (player.currentItem.status == AVPlayerStatusReadyToPlay) {
             // [player play];
-            NSLog(@"playeritem status:%d",player.currentItem.status);
+            NSLog(@"playeritem status:%ld",(long)player.currentItem.status);
             
         } else if (player.status == AVPlayerStatusFailed) {
             NSLog(@"AVPlayerStatusFailed");

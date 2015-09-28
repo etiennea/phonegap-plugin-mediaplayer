@@ -6,9 +6,9 @@
 //
 //
 
-#import "AudioPlayer.h"
+#import "MediaPlayer.h"
 
-@implementation AudioPlayer
+@implementation MediaPlayer
 
 
 -(void)playNext:(CDVInvokedUrlCommand*)command{

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CDVPlugin.h"
+#import <Cordova/CDVPlugin.h>
 
 @class AVQueuePlayer;
 

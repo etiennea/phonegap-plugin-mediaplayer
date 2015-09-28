@@ -6,25 +6,25 @@
 
 var exec = cordova.require('cordova/exec');
 
-var AudioPlayer = {
+var MediaPlayer = {
 
     play: function(success, failure) {
-        exec(success, failure, "AudioPlayer", "play", []);
+        exec(success, failure, "MediaPlayer", "play", []);
     },
 
     pause: function(success, failure) {
-        exec(success, failure, "AudioPlayer", "pause", []);
+        exec(success, failure, "MediaPlayer", "pause", []);
     },
 
 
     playURL: function(urlString, songTitle, albumTitle, artistName, success, failure) {
-        exec(success, failure, "AudioPlayer", "playURL", [urlString, songTitle, albumTitle, artistName]);
+        exec(success, failure, "MediaPlayer", "playURL", [urlString, songTitle, albumTitle, artistName]);
     },
     addNextURL: function(success, failure) {
-        exec(success, failure, "AudioPlayer", "addNextURL", [urlString]);
+        exec(success, failure, "MediaPlayer", "addNextURL", [urlString]);
     },
     playNext: function(success, failure) {
-        exec(success, failure, "AudioPlayer", "playNext", []);
+        exec(success, failure, "MediaPlayer", "playNext", []);
     }
 
 };
