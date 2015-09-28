@@ -1,0 +1,32 @@
+{
+  "name": "phonegap-plugin-mediaplayer",
+  "description": "Simple background music player for iOS phonegap that supports a queue.",
+  "version": "0.0.1",
+  "homepage": "http://github.com/etiennea/phonegap-plugin-mediaplayer#readme",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/etiennea/phonegap-plugin-mediaplayer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/etiennea/phonegap-plugin-mediaplayer/issues"
+  },
+  "cordova": {
+    "id": "phonegap-plugin-mediaplayer",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "ecosystem:phonegap",
+    "cordova-ios"
+  ],
+  "engines": [{
+    "name": "cordova",
+    "version": ">=3.0.0"
+  }],
+  "author": "etiennead",
+  "license": "APL",
+  "scripts": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="phonegap-plugin-mediaplayer"
+    version="1.1.12">
+    <name>MediaPlayer</name>
+    <description>PhoneGap MediaPlayer Plugin</description>
+    <license></license>
+    <keywords>phonegap,content sync</keywords>
+    <repo>https://github.com/etiennea/phonegap-plugin-mediaplayer</repo>
+    <issue>https://github.com/etiennea/phonegap-plugin-mediaplayer/issues</issue>
+
+    <js-module src="www/index.js" name="MediaPlayer">
+        <clobbers target="window.MediaPlayer" />
+    </js-module>
+
+    <platform name="ios">
+        <source-file src="src/ios/MediaPlayer.m" />
+        <header-file src="src/ios/MediaPlayer.h" />
+        <!--         <source-file src="src/ios/SSZipArchive.m" target-dir="minizip" />
+        <header-file src="src/ios/SSZipArchive.h" target-dir="minizip" /> -->
+        <config-file target="config.xml" parent="/*">
+            <feature name="MediaPlayer">
+                <param name="ios-package" value="MediaPlayer" />
+            </feature>
+        </config-file>
+        <framework src="AVFoundation.framework" />
+        <framework src="CoreAudio.framework" />
+        <framework src="MediaPlayer.framework" />
+        <framework src="AudioToolbox.framework" />
+    </platform>
+</plugin>
