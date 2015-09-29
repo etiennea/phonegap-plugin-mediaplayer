@@ -10,7 +10,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@implementation GBAudioPlayer
+@implementation GBAudioPlayer;
+
 
 - (id) init{
     self = [super init];
@@ -33,10 +34,9 @@
 
 -(void)didFinish{
     NSLog(@"did finish");
-    if (player != nil)
-        [player.currentItem removeObserver:self forKeyPath:@"status"];
-    [player removeObserver:self forKeyPath:@"status"];
+
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self.playerItem removeObserver:self forKeyPath:@"status" context:nil];
     [_delegate didFinishPlayingSong];
  
     //   [self play];
@@ -49,9 +49,9 @@
     
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
     
-    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
-    [playerItem addObserver:self forKeyPath:@"status" options:0 context:nil];
-    [player insertItem:playerItem afterItem:nil];
+    self.playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
+    [self.playerItem addObserver:self forKeyPath:@"status" options:0 context:nil];
+    [player insertItem:self.playerItem afterItem:nil];
 }
 
 -(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName{
@@ -108,9 +108,36 @@
     [player pause];
 }
 
+- (void)dealloc {
+    [self.playerItem removeObserver:self forKeyPath:@"status" context:nil];
+    [player removeObserver:self forKeyPath:@"status" context:nil];
+}
 
+- (void)remoteControlReceivedWithEvent: (UIEvent *) receivedEvent {
+    
+    if (receivedEvent.type == UIEventTypeRemoteControl) {
+        
+        switch (receivedEvent.subtype) {
+            
+            case UIEventSubtypeRemoteControlTogglePlayPause:[self playPause:nil];
+            
+            break;
+            
+            default: break;
+        }
+    }
+}
 
-
+- (IBAction)playPause:(id)sender {
+    
+    if (player.rate == 1.0){
+        
+        [player pause];
+    } else if (player.rate == 0.0) {
+        
+        [player play];
+    }
+}
 
 - (NSString *)OSStatusToStr:(OSStatus)st
 {
