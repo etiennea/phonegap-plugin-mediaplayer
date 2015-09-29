@@ -25,7 +25,7 @@
 }
 
 -(void)playNext;
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*) artistName andImg:(NSString*)Img;
+-(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img;
 -(void)pause;
 -(void)addNextURLWithString:(NSString*)urlString;
 
