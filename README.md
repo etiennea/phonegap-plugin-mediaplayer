@@ -1,6 +1,12 @@
 
 > An audio player where you can queue remote urls, to create a music player app
 
+## Killer features
+
+- Supports playlists
+- Support lockscreen info
+- Triggers an event when play has stopped
+
 ## Installation
 
 This requires phonegap 5.0+ ( current stable v1.0.0 )
@@ -21,12 +27,15 @@ MediaPlayer.play();
 
 MediaPlayer.pause();
 
-MediaPlayer.queueUrl('http://myserver/assets/mp3-1.mp3');
+MediaPlayer.playURL(urlString, songTitle, albumTitle, artistName, imgUrl);
 
-MediaPlayer.clearQueue('http://myserver/assets/mp3-1.mp3');
+MediaPlayer.queueUrl('http://myserver/assets/mp3-1.mp3');
 
 MediaPlayer.next();
 
-MediaPlayer.queueLength(function(l){});
-
 ```
+
+## Future updates
+
+- Support next prev pause buttons on lockscreen
+- Support flac
