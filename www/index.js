@@ -17,8 +17,8 @@ var MediaPlayer = {
     },
 
 
-    playURL: function(urlString, songTitle, albumTitle, artistName, success, failure) {
-        exec(success, failure, "MediaPlayer", "playURL", [urlString, songTitle, albumTitle, artistName]);
+    playURL: function(urlString, songTitle, albumTitle, artistName, imgUrl, success, failure) {
+        exec(success, failure, "MediaPlayer", "playURL", [urlString, songTitle, albumTitle, artistName, imgUrl]);
     },
     addNextURL: function(success, failure) {
         exec(success, failure, "MediaPlayer", "addNextURL", [urlString]);

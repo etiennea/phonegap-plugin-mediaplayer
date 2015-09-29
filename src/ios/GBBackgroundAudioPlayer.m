@@ -2,8 +2,10 @@
 //  GBBackgroundAudioPlayer.m
 //  audioplayer
 //
-//  Initially created by Vadim Fainshtein on 1/16/14.
-//  Modified by Etienne Adriaenssen
+//  Created by Vadim Fainshtein on 1/16/14.
+//  Updated by Etienne Adriaenssen 06/10/15
+//
+//   MIT
 //
 
 #import "GBBackgroundAudioPlayer.h"
@@ -54,10 +56,10 @@
     [player insertItem:self.playerItem afterItem:nil];
 }
 
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName{
+-(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img{
     NSLog(@"url:%@",urlString);
     
-    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://voicepolls.com/network/img/logo.png"]]];
+    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:Img]]];
     
     MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:image];
     NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: songTitle,

@@ -3,13 +3,14 @@
 //  audioPlayerPlugin
 //
 //  Created by Vadim Fainshtein on 1/16/14.
+//  Updated by Etienne Adriaenssen 06/10/15
 //
+//   MIT
 //
 
 #import "MediaPlayer.h"
 
 @implementation MediaPlayer
-
 
 -(void)playNext:(CDVInvokedUrlCommand*)command{
     NSLog(@"playNext");
@@ -30,6 +31,7 @@
     NSString* songTitle;
     NSString* artist;
     NSString* albumTitle;
+    NSString* Img;
     
     if ([command.arguments objectAtIndex:0]){
         urlString =[command.arguments objectAtIndex:0];
@@ -46,8 +48,13 @@
     if ([command.arguments objectAtIndex:3]){
         artist =[command.arguments objectAtIndex:3];
     }
+    
+    if ([command.arguments objectAtIndex:4]){
+        Img =[command.arguments objectAtIndex:4];
+    }
 
-    [audioPlayer playURL:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artist];
+
+    [audioPlayer playURL:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artist andImg:Img];
     
 }
 

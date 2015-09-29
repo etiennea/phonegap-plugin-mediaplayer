@@ -3,7 +3,9 @@
 //  audioplayer
 //
 //  Created by Vadim Fainshtein on 1/16/14.
-//  Copyright (c) 2014 GlobalBit. All rights reserved.
+//  Updated by Etienne Adriaenssen 06/10/15
+//
+//   MIT
 //
 
 #import <Foundation/Foundation.h>
@@ -19,18 +21,18 @@
 @end
 
 @interface GBAudioPlayer : NSObject  {
-
     AVQueuePlayer   *player;
 }
 
-
 -(void)playNext;
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*) artistName;
+-(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*) artistName andImg:(NSString*)Img;
 -(void)pause;
 -(void)addNextURLWithString:(NSString*)urlString;
 
 -(void)play;
 
 @property (nonatomic, assign) id<GBAudioPlayerDelegate> delegate;
+@property (nonatomic, strong) id playerObserver;
+@property (nonatomic, strong) id playerItem;
 
 @end

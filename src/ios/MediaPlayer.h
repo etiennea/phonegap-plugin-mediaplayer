@@ -5,6 +5,8 @@
 //  Created by Vadim Fainshtein on 1/16/14.
 //  Updated by Etienne Adriaenssen 06/10/15
 //
+//   MIT
+//
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
