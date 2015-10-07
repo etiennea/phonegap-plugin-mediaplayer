@@ -13,16 +13,18 @@
 @implementation MediaPlayer
 
 -(void)playNext:(CDVInvokedUrlCommand*)command{
+      [self.commandDelegate runInBackground:^{
     NSLog(@"playNext");
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
     }
     [audioPlayer playNext];
+            }];
 }
 -(void)playURL:(CDVInvokedUrlCommand*)command{
     NSLog(@"playURL");
-
+  [self.commandDelegate runInBackground:^{
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
@@ -55,45 +57,48 @@
 
 
     [audioPlayer playURL:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artist andImg:Img];
-    
+      }];
 }
 
 -(void)pause:(CDVInvokedUrlCommand*)command{
     NSLog(@"pause");
-
+  [self.commandDelegate runInBackground:^{
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
     }
     [audioPlayer pause];
+  }];
 }
 
 -(void)addNextURL:(CDVInvokedUrlCommand*)command{
     NSLog(@"addNextURL");
-
+  [self.commandDelegate runInBackground:^{
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
     }
     NSString* urlString = [command.arguments objectAtIndex:0];
     [audioPlayer addNextURLWithString:urlString];
+        }];
 }
 
 -(void)play:(CDVInvokedUrlCommand*)command{
     NSLog(@"play");
-
+  [self.commandDelegate runInBackground:^{
     if (!audioPlayer){
         audioPlayer = [[GBAudioPlayer alloc]init];
         audioPlayer.delegate = self;
     }
     [audioPlayer play];
-    
+      }];
 }
 
 -(void)didFinishPlayingSong{
     NSLog(@"didFinishPlayingSong");
-
+  [self.commandDelegate runInBackground:^{
     [self.webView stringByEvaluatingJavaScriptFromString:@"window.MediaPlayer.ended()"];
+        }];
 }
 
 @end
