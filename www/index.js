@@ -32,10 +32,10 @@ var MediaPlayer = {
         //clear the queue
         exec(success, failure, "MediaPlayer", "clear", []);
     },
-    fadeIn: function() {
+    fadeIn: function(success, failure) {
         exec(success, failure, "MediaPlayer", "fadeIn", []);
     },
-    fadeOut: function() {
+    fadeOut: function(success, failure) {
         exec(success, failure, "MediaPlayer", "fadeOut", []);
     },
 
