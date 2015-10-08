@@ -27,7 +27,12 @@ var MediaPlayer = {
     },
     ended: function() {
         console.log('Playlist ended')
-    }
+    }, 
+    clear: function(success, failure) {
+        //clear the queue
+        exec(success, failure, "MediaPlayer", "clear", []);
+    },
+
 
 };
 

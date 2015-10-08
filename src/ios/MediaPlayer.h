@@ -23,7 +23,7 @@
 -(void)pause:(CDVInvokedUrlCommand*)command;
 -(void)addNextURL:(CDVInvokedUrlCommand*)command;
 -(void)play:(CDVInvokedUrlCommand*)command;
-
+-(void)clear:(CDVInvokedUrlCommand*)command;
 
 @property (nonatomic, copy) NSString* callbackID;
 @end

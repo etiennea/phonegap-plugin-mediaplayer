@@ -74,10 +74,11 @@
 }
 
 -(void)play{
-    
     [player play];
-    
-    
+}
+
+-(void)clear{
+    [player removeAllItems];
 }
 
 -(void)playNext{

@@ -30,6 +30,7 @@
 -(void)addNextURLWithString:(NSString*)urlString;
 
 -(void)play;
+-(void)clear;
 
 @property (nonatomic, assign) id<GBAudioPlayerDelegate> delegate;
 @property (nonatomic, strong) id playerObserver;
