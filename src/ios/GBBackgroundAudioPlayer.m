@@ -59,15 +59,23 @@
 -(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img{
     NSLog(@"url:%@",urlString);
     
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
+    dispatch_async(queue, ^{
     UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:Img]]];
     
-    MPMediaItemArtwork* artwork = 	[[MPMediaItemArtwork alloc]initWithImage:image];
+    MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
     NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: songTitle,
                                  MPMediaItemPropertyArtist: artistName,
                                  MPMediaItemPropertyAlbumTitle: albumTitle,
                                  MPMediaItemPropertyArtwork: artwork};
     
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
+        //dispatch_sync(dispatch_get_main_queue(), ^{
+            // Update UI
+            // Example:
+            // self.myLabel.text = result;
+        //});
+    });
     [player removeAllItems];
     [self addNextURLWithString:urlString];
     [self play];
@@ -82,6 +90,7 @@
 }
 
 -(void)playNext{
+    
     [player advanceToNextItem];
 }
 
