@@ -89,6 +89,16 @@
     [audioPlayer clear];
 }
 
+-(void)fadeIn:(CDVInvokedUrlCommand*)command{
+    NSLog(@"play");
+    [audioPlayer fadeInVolume];
+}
+
+-(void)fadeOut:(CDVInvokedUrlCommand*)command{
+    NSLog(@"play");
+    [audioPlayer fadeOutVolume];
+}
+
 -(void)didFinishPlayingSong{
     NSLog(@"didFinishPlayingSong");
     [self.webView stringByEvaluatingJavaScriptFromString:@"window.MediaPlayer.ended()"];

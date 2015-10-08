@@ -27,12 +27,17 @@ var MediaPlayer = {
     },
     ended: function() {
         console.log('Playlist ended')
-    }, 
+    },
     clear: function(success, failure) {
         //clear the queue
         exec(success, failure, "MediaPlayer", "clear", []);
     },
-
+    fadeIn: function() {
+        exec(success, failure, "MediaPlayer", "fadeIn", []);
+    },
+    fadeOut: function() {
+        exec(success, failure, "MediaPlayer", "fadeOut", []);
+    },
 
 };
 

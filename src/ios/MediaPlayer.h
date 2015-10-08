@@ -24,6 +24,8 @@
 -(void)addNextURL:(CDVInvokedUrlCommand*)command;
 -(void)play:(CDVInvokedUrlCommand*)command;
 -(void)clear:(CDVInvokedUrlCommand*)command;
+-(void)fadeIn:(CDVInvokedUrlCommand*)command;
+-(void)fadeOut:(CDVInvokedUrlCommand*)command;
 
 @property (nonatomic, copy) NSString* callbackID;
 @end

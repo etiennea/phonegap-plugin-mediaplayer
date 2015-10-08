@@ -85,6 +85,46 @@
     [player advanceToNextItem];
 }
 
+-(void)fadeOutVolume
+{
+    AVPlayerItem *myAVPlayerItem = player.currentItem;
+    AVAsset *myAVAsset = myAVPlayerItem.asset;
+    NSArray *audioTracks = [myAVAsset tracksWithMediaType:AVMediaTypeAudio];
+
+    NSMutableArray *allAudioParams = [NSMutableArray array];
+    for (AVAssetTrack *track in audioTracks) {
+
+        AVMutableAudioMixInputParameters *audioInputParams = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
+        [audioInputParams setVolumeRampFromStartVolume:1.0 toEndVolume:0 timeRange:CMTimeRangeMake(CMTimeMake(0, 1), CMTimeMake(5, 1))];
+        [allAudioParams addObject:audioInputParams];
+
+    }
+
+    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
+    [audioMix setInputParameters:allAudioParams];
+    [myAVPlayerItem setAudioMix:audioMix];
+}
+
+-(void)fadeInVolume
+{
+    AVPlayerItem *myAVPlayerItem = player.currentItem;
+    AVAsset *myAVAsset = myAVPlayerItem.asset;
+    NSArray *audioTracks = [myAVAsset tracksWithMediaType:AVMediaTypeAudio];
+
+    NSMutableArray *allAudioParams = [NSMutableArray array];
+    for (AVAssetTrack *track in audioTracks) {
+
+        AVMutableAudioMixInputParameters *audioInputParams = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
+        [audioInputParams setVolumeRampFromStartVolume:0 toEndVolume:1.0 timeRange:CMTimeRangeMake(CMTimeMake(0, 1), CMTimeMake(5, 1))];
+        [allAudioParams addObject:audioInputParams];
+
+    }
+
+    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
+    [audioMix setInputParameters:allAudioParams];
+    [myAVPlayerItem setAudioMix:audioMix];
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     NSLog(@"observer player:%ld",(long)player.status);
     NSLog(@"observer playeritem:%ld",(long)player.currentItem.status);

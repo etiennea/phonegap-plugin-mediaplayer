@@ -31,6 +31,8 @@
 
 -(void)play;
 -(void)clear;
+-(void)fadeOutVolume;
+-(void)fadeInVolume;
 
 @property (nonatomic, assign) id<GBAudioPlayerDelegate> delegate;
 @property (nonatomic, strong) id playerObserver;
