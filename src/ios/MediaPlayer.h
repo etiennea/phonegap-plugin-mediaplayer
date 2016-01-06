@@ -18,6 +18,8 @@
     GBAudioPlayer* audioPlayer;
 }
 
+-(void)setup:(CDVInvokedUrlCommand*)command;
+-(void)currentTrack:(CDVInvokedUrlCommand*)command;
 -(void)playNext:(CDVInvokedUrlCommand*)command;
 -(void)playURL:(CDVInvokedUrlCommand*)command;
 -(void)pause:(CDVInvokedUrlCommand*)command;

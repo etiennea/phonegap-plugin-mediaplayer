@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="phonegap-plugin-mediaplayer"
-    version="0.0.2">
+    version="1.0.0">
     <name>MediaPlayer</name>
     <description>PhoneGap MediaPlayer Plugin</description>
     <license></license>
@@ -20,8 +20,7 @@
         <header-file src="src/ios/MediaPlayer.h" />
         <source-file src="src/ios/GBBackgroundAudioPlayer.m" />
         <header-file src="src/ios/GBBackgroundAudioPlayer.h" />
-        <!--         <source-file src="src/ios/SSZipArchive.m" target-dir="minizip" />
-        <header-file src="src/ios/SSZipArchive.h" target-dir="minizip" /> -->
+ 
         <config-file target="config.xml" parent="/*">
             <feature name="MediaPlayer">
                 <param name="ios-package" value="MediaPlayer" />

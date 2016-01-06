@@ -4,9 +4,9 @@
  * Module dependencies.
  */
 
-var exec = cordova.require('cordova/exec');
+ var exec = cordova.require('cordova/exec');
 
-var MediaPlayer = {
+ var MediaPlayer = {
 
     play: function(success, failure) {
         exec(success, failure, "MediaPlayer", "play", []);
@@ -16,17 +16,18 @@ var MediaPlayer = {
         exec(success, failure, "MediaPlayer", "pause", []);
     },
 
-    playURL: function(urlString, songTitle, albumTitle, artistName, imgUrl, success, failure) {
-        exec(success, failure, "MediaPlayer", "playURL", [urlString, songTitle, albumTitle, artistName, imgUrl]);
+    playURL: function(urlString, songTitle, albumTitle, artistName, imgUrl, trackId, success, failure) {
+        exec(success, failure, "MediaPlayer", "playURL", [urlString, songTitle, albumTitle, artistName, imgUrl, trackId]);
     },
-    addNextURL: function(success, failure) {
-        exec(success, failure, "MediaPlayer", "addNextURL", [urlString]);
+    addNextURL: function(urlString, songTitle, albumTitle, artistName, imgUrl, trackId, success, failure) {
+        exec(success, failure, "MediaPlayer", "addNextURL", [urlString, songTitle, albumTitle, artistName, imgUrl, trackId]);
     },
     playNext: function(success, failure) {
         exec(success, failure, "MediaPlayer", "playNext", []);
     },
     ended: function() {
         console.log('Playlist ended')
+        //replace this function
     },
     clear: function(success, failure) {
         //clear the queue
@@ -38,7 +39,15 @@ var MediaPlayer = {
     fadeOut: function(success, failure) {
         exec(success, failure, "MediaPlayer", "fadeOut", []);
     },
-
+    setup: function(trackingUrl, success, failure) {
+        //egg http://trackme.com/track?user=123
+        //will add &trackId=123
+        exec(success, failure, "MediaPlayer", "setup", [trackingUrl]);
+    },
+    currentTrack: function(success, failure) {
+        //return currentrack id
+        exec(success, failure, "MediaPlayer", "currentTrack", []);
+    },
 };
 
 module.exports = MediaPlayer;

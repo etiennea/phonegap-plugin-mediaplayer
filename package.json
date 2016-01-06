@@ -1,7 +1,7 @@
 {
   "name": "phonegap-plugin-mediaplayer",
-  "description": "Simple background music player for iOS phonegap that supports a queue.",
-  "version": "0.0.2",
+  "description": "Simple background music player for iOS phonegap that supports a queue, play tracking and MPNowPlayingInfoCenter",
+  "version": "1.0.0",
   "homepage": "http://github.com/etiennea/phonegap-plugin-mediaplayer#readme",
   "repository": {
     "type": "git",

@@ -25,15 +25,15 @@
 }
 
 -(void)playNext;
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img;
+-(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId;
 -(void)pause;
--(void)addNextURLWithString:(NSString*)urlString;
-
+-(void)addNextURLWithString:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId;
 -(void)play;
 -(void)clear;
 -(void)fadeOutVolume;
 -(void)fadeInVolume;
 
+@property (nonatomic, copy) NSString *getCurrentItem;
 @property (nonatomic, assign) id<GBAudioPlayerDelegate> delegate;
 @property (nonatomic, strong) id playerObserver;
 @property (nonatomic, strong) id playerItem;
