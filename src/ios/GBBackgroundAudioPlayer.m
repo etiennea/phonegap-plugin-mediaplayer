@@ -50,7 +50,8 @@ NSMutableArray *imgs = nil;
     
     //trigger javascript next
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinish) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAudioSessionEvent:) name:AVAudioSessionInterruptionNotification object:nil];
+     
     player = [[AVQueuePlayer alloc]init];
     player.actionAtItemEnd = AVPlayerActionAtItemEndAdvance;
     
@@ -66,6 +67,24 @@ NSMutableArray *imgs = nil;
     NSLog(@"did finish javascript");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_delegate didFinishPlayingSong];
+}
+
+- (void) onAudioSessionEvent: (NSNotification *) notification
+{
+    //Check the type of notification, especially if you are sending multiple AVAudioSession events here
+    if ([notification.name isEqualToString:AVAudioSessionInterruptionNotification]) {
+        NSLog(@"Interruption notification received!");
+        
+        //Check to see if it was a Begin interruption
+        if ([[notification.userInfo valueForKey:AVAudioSessionInterruptionTypeKey] isEqualToNumber:[NSNumber numberWithInt:AVAudioSessionInterruptionTypeBegan]]) {
+            NSLog(@"Interruption began!");
+            
+        } else {
+            NSLog(@"Interruption ended!");
+            //Resume your audio
+            [player play];
+        }
+    }
 }
 
 -(void)addNextURLWithString:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId{
