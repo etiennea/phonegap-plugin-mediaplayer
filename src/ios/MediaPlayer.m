@@ -158,7 +158,10 @@ NSString *trackingUrl = @"test";
 
 -(void)didFinishPlayingSong{
     NSLog(@"didFinishPlayingSong");
-    [self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
+
+    if ([self.webView isKindOfClass:[UIWebView class]]) {
+        [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
+    }
     
     //Sends trackid
     if(![trackingUrl  isEqual: @"test"]){
