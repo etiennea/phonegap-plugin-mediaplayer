@@ -117,15 +117,19 @@ NSMutableArray *imgs = nil;
     
     currentIndex = 1;
     
-    //set stuff
-    UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:Img]]];
-    MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
-    NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: songTitle,
-                                 MPMediaItemPropertyArtist: artistName,
-                                 MPMediaItemPropertyAlbumTitle: albumTitle,
-                                 MPMediaItemPropertyArtwork: artwork};
-    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
-    
+    NSURL *url = [NSURL URLWithString:Img];
+    NSURLSessionDownloadTask *downloadPhotoTask = [[NSURLSession sharedSession] downloadTaskWithURL:url completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+        UIImage *image = [UIImage imageWithData: [NSData dataWithContentsOfURL:location]];
+        MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
+        NSDictionary *nowPlaying = @{
+                                     MPMediaItemPropertyTitle: songTitle,
+                                     MPMediaItemPropertyArtist: artistName,
+                                     MPMediaItemPropertyAlbumTitle: albumTitle,
+                                     MPMediaItemPropertyArtwork: artwork
+                                     };
+        [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
+    }];
+    [downloadPhotoTask resume];
     
     [player removeAllItems];
     if (player != nil && ![currentItem isEqual: @"0"])
@@ -156,13 +160,29 @@ NSMutableArray *imgs = nil;
                 if((currentIndex + 1) < [ids count]){
                 
                 
-                    UIImage *image2 = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString: [imgs objectAtIndex:currentIndex]]]];
-                    MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:image2];
-                    NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: [titles objectAtIndex:currentIndex],
-                                                 MPMediaItemPropertyArtist: [artists objectAtIndex:currentIndex],
-                                                 MPMediaItemPropertyAlbumTitle: [albums objectAtIndex:currentIndex],
-                                                 MPMediaItemPropertyArtwork: artwork};
-                    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
+//                    //UIImage *image2 = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString: [imgs objectAtIndex:currentIndex]]]];
+//                    //MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:image2];
+//                    NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: [titles objectAtIndex:currentIndex],
+//                                                 MPMediaItemPropertyArtist: [artists objectAtIndex:currentIndex],
+//                                                 MPMediaItemPropertyAlbumTitle: [albums objectAtIndex:currentIndex],
+//                                                 //MPMediaItemPropertyArtwork: artwork
+//                                                 };
+//                    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
+//                    
+                    NSURL *url = [NSURL URLWithString: [imgs objectAtIndex:currentIndex]];
+                    NSURLSessionDownloadTask *downloadPhotoTask = [[NSURLSession sharedSession] downloadTaskWithURL:url completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+                        UIImage *image = [UIImage imageWithData: [NSData dataWithContentsOfURL:location]];
+                        MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
+                        NSDictionary *nowPlaying = @{
+                                                     MPMediaItemPropertyTitle: [titles objectAtIndex:currentIndex],
+                                                     MPMediaItemPropertyArtist: [artists objectAtIndex:currentIndex],
+                                                     MPMediaItemPropertyAlbumTitle: [albums objectAtIndex:currentIndex],
+                                                     MPMediaItemPropertyArtwork: artwork
+                                                     };
+                        [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
+                    }];
+                    [downloadPhotoTask resume];
+                    
                 } else {
                     currentItem = @"end";
                 }
