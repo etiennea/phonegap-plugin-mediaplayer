@@ -8,7 +8,7 @@
 //   MIT
 //
 
-#import "GBBackgroundAudioPlayer.h"
+#import "APPAudioPlayer.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
