@@ -57,7 +57,8 @@ exports.setup = function (url, success, failure) {
  * @return [ Void ]
  */
 exports.play = function (song, callback) {
-    var isSongGiven = typeof song != 'function';
+    console.log(song);
+    var isSongGiven = (typeof song != 'function') && (typeof song != 'undefined');
 
     if (isSongGiven) {
         exports.queue(song, { replace: false, play: true }, callback);
@@ -134,29 +135,29 @@ exports.stop = function (callback) {
 };
 
 /**
- * Stop playing and clear the queue.
+ * Fade the volume of the track from 0 to 1.
  *
  * @param [ Function ] callback Optional callback.
  *
  * @return [ Void ]
  */
 exports.fadeInVolume = function (callback) {
-    exec(success, failure, 'AudioPlayer', 'fadeInVolume', []);
+    exec(callback, null, 'AudioPlayer', 'fadeInVolume', []);
 };
 
 /**
- * Stop playing and clear the queue.
+ * Fade the volume of the track from 1 to 0.
  *
  * @param [ Function ] callback Optional callback.
  *
  * @return [ Void ]
  */
 exports.fadeOutVolume = function (callback) {
-    exec(success, failure, 'AudioPlayer', 'fadeOutVolume', []);
+    exec(callback, null, 'AudioPlayer', 'fadeOutVolume', []);
 };
 
 /**
- * Stop playing and clear the queue.
+ * Get the id of the current track.
  *
  * @param [ Function ] callback Function to execute with the ID of the track.
  *
