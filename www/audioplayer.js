@@ -57,7 +57,6 @@ exports.setup = function (url, success, failure) {
  * @return [ Void ]
  */
 exports.play = function (song, callback) {
-    console.log(song);
     var isSongGiven = (typeof song != 'function') && (typeof song != 'undefined');
 
     if (isSongGiven) {
