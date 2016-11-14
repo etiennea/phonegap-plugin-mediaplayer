@@ -27,6 +27,7 @@
  */
 
 #import "APPAudioPlayerPlugin.h"
+#import "APPAudio.h"
 
 @interface APPAudioPlayerPlugin()
 
@@ -63,12 +64,13 @@
  *
  * @return [ Void ]
  */
-- (void) setup:(CDVInvokedUrlCommand*)command {
+- (void) setup:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         trackingUrl = [command.arguments objectAtIndex:0];
-        
+
         NSAssert(trackingUrl != nil, @"[AudioPlayer] Setup failed!");
-        
+
         [self succeeded:command];
     }];
 }
@@ -80,7 +82,8 @@
  *
  * @return [ Void ]
  */
-- (void) play:(CDVInvokedUrlCommand*)command {
+- (void) play:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer play];
         [self succeeded:command];
@@ -94,7 +97,8 @@
  *
  * @return [ Void ]
  */
-- (void) playNext:(CDVInvokedUrlCommand*)command {
+- (void) playNext:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer playNext];
         [self succeeded:command];
@@ -108,7 +112,8 @@
  *
  * @return [ Void ]
  */
-- (void) pause:(CDVInvokedUrlCommand*)command {
+- (void) pause:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer pause];
         [self succeeded:command];
@@ -122,7 +127,8 @@
  *
  * @return [ Void ]
  */
-- (void) stop:(CDVInvokedUrlCommand*)command {
+- (void) stop:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer clear];
         [self succeeded:command];
@@ -136,16 +142,21 @@
  *
  * @return [ Void ]
  */
-- (void) queue:(CDVInvokedUrlCommand*)command {
+- (void) queue:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         NSDictionary* song = [command.arguments objectAtIndex:0];
         NSDictionary* opts = [command.arguments objectAtIndex:1];
-        
+
         NSAssert(song != nil, @"[AudioPlayer] Missing song!");
         NSAssert(opts != nil, @"[AudioPlayer] Missing opts!");
+
+        APPAudio* audio  = [[APPAudio alloc] initWithDict:song];
+        BOOL playFlag    = [[opts objectForKey:@"play"] boolValue];
+        BOOL replaceFlag = [[opts objectForKey:@"replace"] boolValue];
         
-        // TODO next
-        
+        // TODO [audioPlayer queue:audio play:playFlag, replace:replaceFlag];
+
         [self succeeded:command];
     }];
 }
@@ -157,14 +168,15 @@
  *
  * @return [ Void ]
  */
-- (void) currentTrack:(CDVInvokedUrlCommand*)command {
+- (void) currentTrack:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         NSString* track = [audioPlayer getCurrentItem];
 
         CDVPluginResult* pluginResult;
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                          messageAsString:track];
-    
+
         [self.commandDelegate sendPluginResult:pluginResult
                                     callbackId:command.callbackId];
     }];
@@ -177,7 +189,8 @@
  *
  * @return [ Void ]
  */
-- (void) fadeInVolume:(CDVInvokedUrlCommand*)command {
+- (void) fadeInVolume:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer fadeInVolume];
         [self succeeded:command];
@@ -191,89 +204,12 @@
  *
  * @return [ Void ]
  */
-- (void) fadeOutVolume:(CDVInvokedUrlCommand*)command {
+- (void) fadeOutVolume:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         [audioPlayer fadeOutVolume];
         [self succeeded:command];
     }];
-}
-
--(void)playURL:(CDVInvokedUrlCommand*)command{
-    
-    if (!audioPlayer){
-        audioPlayer = [[GBAudioPlayer alloc]init];
-        audioPlayer.delegate = self;
-    }
-    NSString* urlString;
-    NSString* songTitle;
-    NSString* artist;
-    NSString* albumTitle;
-    NSString* Img;
-    NSString* trackId;
-    
-    if ([command.arguments objectAtIndex:0]){
-        urlString =[command.arguments objectAtIndex:0];
-    }
-    else{
-        return;
-    }
-    if ([command.arguments objectAtIndex:1]){
-        songTitle =[command.arguments objectAtIndex:1];
-    }
-    if ([command.arguments objectAtIndex:2]){
-        albumTitle =[command.arguments objectAtIndex:2];
-    }
-    if ([command.arguments objectAtIndex:3]){
-        artist =[command.arguments objectAtIndex:3];
-    }
-    if ([command.arguments objectAtIndex:4]){
-        Img =[command.arguments objectAtIndex:4];
-    }
-    if ([command.arguments objectAtIndex:5]){
-        trackId =[command.arguments objectAtIndex:5];
-    }
-    
-    NSLog(@"playURL: %@", trackId);
-    [audioPlayer playURL:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artist andImg:Img andTrackId:trackId];
-}
-
--(void)addNextURL:(CDVInvokedUrlCommand*)command{
-    
-    if (!audioPlayer){
-        audioPlayer = [[GBAudioPlayer alloc]init];
-        audioPlayer.delegate = self;
-    }
-    
-    NSString* urlString;
-    NSString* songTitle;
-    NSString* artist;
-    NSString* albumTitle;
-    NSString* Img;
-    NSString* trackId;
-    
-    if ([command.arguments objectAtIndex:0]){
-        urlString =[command.arguments objectAtIndex:0];
-    }
-    else{
-        return;
-    }
-    if ([command.arguments objectAtIndex:1]){
-        songTitle =[command.arguments objectAtIndex:1];
-    }
-    if ([command.arguments objectAtIndex:2]){
-        albumTitle =[command.arguments objectAtIndex:2];
-    }
-    if ([command.arguments objectAtIndex:3]){
-        artist =[command.arguments objectAtIndex:3];
-    }
-    if ([command.arguments objectAtIndex:4]){
-        Img =[command.arguments objectAtIndex:4];
-    }
-    if ([command.arguments objectAtIndex:5]){
-        trackId =[command.arguments objectAtIndex:5];
-    }
-    NSLog(@"addNextURL: %@", trackId);
-    [audioPlayer addNextURLWithString:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artist andImg:Img andTrackId:trackId];
 }
 
 #pragma mark -
@@ -285,7 +221,7 @@
     if ([self.webView isKindOfClass:[UIWebView class]]) {
         [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
     }
-    
+
     //Sends trackid
     if(![trackingUrl  isEqual: @"test"]){
         NSLog(@"play tracking");
@@ -293,13 +229,13 @@
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
         [request setHTTPMethod:@"GET"];
         [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@", trackingUrl, currentTrack]]];
-        
+
         NSError *error = [[NSError alloc] init];
         NSHTTPURLResponse *responseCode = nil;
-        
+
         //NSData *oResponseData =
         [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-        
+
         if([responseCode statusCode] != 200){
             NSLog(@"Error getting %@, HTTP status code %li", trackingUrl, (long)[responseCode statusCode]);
         }
@@ -316,7 +252,7 @@
 {
     CDVPluginResult *result = [CDVPluginResult
                                resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:result
                                 callbackId:command.callbackId];
 }

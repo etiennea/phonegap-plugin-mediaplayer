@@ -77,6 +77,8 @@
         <source-file src="src/ios/APPAudioPlayerPlugin.m" />
         <header-file src="src/ios/APPAudioPlayer.h" />
         <source-file src="src/ios/APPAudioPlayer.m" />
+        <header-file src="src/ios/APPAudio.h" />
+        <source-file src="src/ios/APPAudio.m" />
 
    </platform>
 
