@@ -166,6 +166,10 @@ exports.getCurrentTrack = function (callback) {
     exec(callback, null, 'AudioPlayer', 'currentTrack', []);
 };
 
+
+/********
+ * UTIL *
+ ********/
 /**
  * Validates the given song regarding completeness.
  *
@@ -176,11 +180,89 @@ exports.getCurrentTrack = function (callback) {
 exports.isValidSong = function (song) {
     var attrs = ['id', 'title', 'album', 'artist', 'file', 'cover'];
 
-    if (!song) return false;
+    if (!song)
+        return false;
 
     for (var index = 0, attr = attrs[index]; index < attrs.length; index++) {
         if (!song[attr]) return false;
     }
 
     return true;
+};
+
+
+/**********
+ * EVENTS *
+ **********/
+
+exports._listener = {};
+
+/**
+ * Fire event with given arguments.
+ *
+ * @param [ String ] event The event's name.
+ * @param {args*} The callback's arguments.
+ *
+ * @return [ Void ]
+ */
+exports.fireEvent = function (event) {
+    var args     = Array.apply(null, arguments).slice(1),
+        listener = this._listener[event];
+
+    if (!listener)
+        return;
+
+    for (var i = 0; i < listener.length; i++) {
+        var fn    = listener[i][0],
+            scope = listener[i][1];
+
+        fn.apply(scope, args);
+    }
+};
+
+/**
+ * Register callback for given event.
+ *
+ * @param [ String ] event The event's name.
+ * @param [ Function ] callback The function to be exec as callback.
+ * @param [ Object ] scope The callback function's scope.
+ *
+ * @return [ Void ]
+ */
+exports.on = function (event, callback, scope) {
+
+    if (typeof callback !== "function")
+        return;
+
+    if (!this._listener[event]) {
+        this._listener[event] = [];
+    }
+
+    var item = [callback, scope || window];
+
+    this._listener[event].push(item);
+};
+
+/**
+ * Unregister callback for given event.
+ *
+ * @param [ String ] event The event's name.
+ * @param [ Function ] callback The function to be exec as callback.
+ *
+ * @return [ Void ]
+ */
+exports.un = function (event, callback) {
+    var listener = this._listener[event];
+
+    if (!listener)
+        return;
+
+    for (var i = 0; i < listener.length; i++) {
+        var fn = listener[i][0];
+
+        if (fn == callback) {
+            listener.splice(i, 1);
+            break;
+        }
+    }
 };

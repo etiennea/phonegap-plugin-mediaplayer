@@ -32,7 +32,7 @@
 @interface APPAudioPlayerPlugin()
 
 // Instance of the audio player which contains all implementation.
-@property (nonatomic, retain) GBAudioPlayer* audioPlayer;
+@property (nonatomic, retain) APPAudioPlayer* audioPlayer;
 // Tracking URL
 @property (nonatomic, copy) NSString* trackingUrl;
 
@@ -50,7 +50,7 @@
  */
 - (void) pluginInitialize
 {
-    audioPlayer = [[GBAudioPlayer alloc] init];
+    audioPlayer = [[APPAudioPlayer alloc] init];
     audioPlayer.delegate = self;
 }
 
@@ -71,7 +71,7 @@
 
         NSAssert(trackingUrl != nil, @"[AudioPlayer] Setup failed!");
 
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"setup"];
     }];
 }
 
@@ -86,7 +86,7 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer play];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"play"];
     }];
 }
 
@@ -101,7 +101,7 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer playNext];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"next"];
     }];
 }
 
@@ -116,7 +116,7 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer pause];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"pause"];
     }];
 }
 
@@ -131,7 +131,7 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer clear];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"stop"];
     }];
 }
 
@@ -157,7 +157,7 @@
         
         // TODO [audioPlayer queue:audio play:playFlag, replace:replaceFlag];
 
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"queue"];
     }];
 }
 
@@ -171,14 +171,7 @@
 - (void) currentTrack:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSString* track = [audioPlayer getCurrentItem];
-
-        CDVPluginResult* pluginResult;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                         messageAsString:track];
-
-        [self.commandDelegate sendPluginResult:pluginResult
-                                    callbackId:command.callbackId];
+        [self succeedWithTrackId:command andFireEvent:NULL];
     }];
 }
 
@@ -193,7 +186,7 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer fadeInVolume];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"fadein"];
     }];
 }
 
@@ -208,14 +201,14 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer fadeOutVolume];
-        [self succeeded:command];
+        [self succeedWithTrackId:command andFireEvent:@"fadeout"];
     }];
 }
 
 #pragma mark -
 #pragma mark GBAudioPlayerDelegate
 
--(void)didFinishPlayingSong{
+-(void)didFinishPlayingAudio{
     NSLog(@"didFinishPlayingSong");
 
     if ([self.webView isKindOfClass:[UIWebView class]]) {
@@ -246,15 +239,45 @@
 #pragma mark Helper
 
 /**
- * Simply invokes the callback without any parameter.
+ * Invoke the callback and fire the event if given.
+ *
+ * @param [ CDVInvokedUrlCommand ] command The callback function.
+ * @param [ NSString* ] event Optional name of the event to fire.
+ *
+ * @return [ Void ]
  */
-- (void) succeeded:(CDVInvokedUrlCommand*)command
+- (void) succeedWithTrackId:(CDVInvokedUrlCommand*)command andFireEvent:(NSString*)event
 {
+    NSString* track = [audioPlayer getCurrentItem];
     CDVPluginResult *result = [CDVPluginResult
-                               resultWithStatus:CDVCommandStatus_OK];
+                               resultWithStatus:CDVCommandStatus_OK
+                               messageAsString:track];
 
     [self.commandDelegate sendPluginResult:result
                                 callbackId:command.callbackId];
+
+    if (event) {
+        [self fireEvent:event];
+    }
+}
+
+/**
+ * Fire the specified event on JS side.
+ *
+ * @param [ NSString* ] event The name of the event to fire.
+ *
+ * @return [ Void ]
+ */
+- (void) fireEvent:(NSString*)event
+{
+    NSString* track  = [audioPlayer getCurrentItem];
+    NSString* params = [NSString stringWithFormat:@"\"%@\"", track];
+    
+    NSString* js;
+    js = [NSString stringWithFormat:
+          @"cordova.plugins.audioPlayer.fireEvent('%@', %@)", event, params];
+    
+    [self.commandDelegate evalJs:js];
 }
 
 @end

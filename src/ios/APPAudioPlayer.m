@@ -12,7 +12,16 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@implementation GBAudioPlayer;
+@interface APPAudioPlayer() {
+    AVQueuePlayer* player;
+}
+
+@property (nonatomic, strong) id playerObserver;
+@property (nonatomic, strong) id playerItem;
+
+@end
+
+@implementation APPAudioPlayer;
 
 NSString *KVOcontext = @"GBAudioPlayer";
 NSString *currentItem = @"0";
@@ -66,7 +75,7 @@ NSMutableArray *imgs = nil;
 -(void)didFinish{
     NSLog(@"did finish javascript");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_delegate didFinishPlayingSong];
+    [_delegate didFinishPlayingAudio];
 }
 
 - (void) onAudioSessionEvent: (NSNotification *) notification

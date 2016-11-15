@@ -30,7 +30,7 @@
 #import <Cordova/CDVPlugin.h>
 #import "APPAudioPlayer.h"
 
-@interface APPAudioPlayerPlugin : CDVPlugin <GBAudioPlayerDelegate>
+@interface APPAudioPlayerPlugin : CDVPlugin <APPAudioPlayerDelegate>
 
 // Setup tracking function.
 - (void) setup:(CDVInvokedUrlCommand*)command;
