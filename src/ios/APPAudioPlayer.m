@@ -62,6 +62,7 @@ NSMutableArray *imgs = nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinish) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAudioSessionEvent:) name:AVAudioSessionInterruptionNotification object:nil];
 
+    //initialize data-arrays
     titles = [NSMutableArray array];
     artists = [NSMutableArray array];
     albums = [NSMutableArray array];
@@ -83,7 +84,6 @@ NSMutableArray *imgs = nil;
 }
 
 -(void)queue:(APPAudio*) song play:(BOOL)startPlaying replace:(BOOL)replaceFlag{
-    //NSLog(@"url:%@",urlString);
 
     NSURL *url=[NSURL URLWithString:[song file]];
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
@@ -97,6 +97,11 @@ NSMutableArray *imgs = nil;
     [albums addObject:[song album]];
     [imgs addObject:[song cover]];
     [ids addObject:[song id]];
+
+    if (startPlaying) {
+        [self play];
+    }
+
 
 }
 
