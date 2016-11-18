@@ -25,8 +25,8 @@
  *
  * @APPPLANT_LICENSE_HEADER_END@
  */
-
 #import <AVFoundation/AVFoundation.h>
+#import "APPAudio.h"
 
 @protocol APPAudioPlayerDelegate <NSObject>
 
@@ -36,6 +36,7 @@
 
 @interface APPAudioPlayer : NSObject
 
+-(void)queue:(APPAudio*) song play:(BOOL)startPlaying replace:(BOOL)replaceFlag;
 -(void)playNext;
 -(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId;
 -(void)pause;

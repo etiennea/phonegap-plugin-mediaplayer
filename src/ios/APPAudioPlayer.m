@@ -82,7 +82,7 @@ NSMutableArray *imgs = nil;
     return self;
 }
 
--(void)queue:(APPAudio*) song play:(BOOL*)startPlaying replace:(BOOL*)replace{
+-(void)queue:(APPAudio*) song play:(BOOL)startPlaying replace:(BOOL)replaceFlag{
     //NSLog(@"url:%@",urlString);
 
     NSURL *url=[NSURL URLWithString:[song file]];

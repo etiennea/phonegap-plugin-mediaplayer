@@ -154,8 +154,8 @@
         APPAudio* audio  = [[APPAudio alloc] initWithDict:song];
         BOOL playFlag    = [[opts objectForKey:@"play"] boolValue];
         BOOL replaceFlag = [[opts objectForKey:@"replace"] boolValue];
-        
-        // TODO [audioPlayer queue:audio play:playFlag, replace:replaceFlag];
+
+        [audioPlayer queue:audio play:playFlag replace:replaceFlag];
 
         [self succeedWithTrackId:command andFireEvent:@"queue"];
     }];
@@ -272,11 +272,11 @@
 {
     NSString* track  = [audioPlayer getCurrentItem];
     NSString* params = [NSString stringWithFormat:@"\"%@\"", track];
-    
+
     NSString* js;
     js = [NSString stringWithFormat:
           @"cordova.plugins.audioPlayer.fireEvent('%@', %@)", event, params];
-    
+
     [self.commandDelegate evalJs:js];
 }
 
