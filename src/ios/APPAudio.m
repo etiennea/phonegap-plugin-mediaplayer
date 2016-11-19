@@ -45,9 +45,9 @@
 - (id) initWithDict:(NSDictionary*)dictionary
 {
     self = [self init];
-    
+
     self.dict = dictionary;
-    
+
     return self;
 }
 
@@ -89,17 +89,17 @@
 /**
  * An URL (local or remote) where to get the file.
  */
-- (NSString*) file
+- (NSURL*) file
 {
-    return [dict objectForKey:@"file"];
+    return [NSURL URLWithString:[dict objectForKey:@"file"]];
 }
 
 /**
  * An URL (local or remote) where to get the cover image.
  */
-- (NSString*) cover
+- (NSURL*) cover
 {
-    return [dict objectForKey:@"cover"];
+    return [NSURL URLWithString:[dict objectForKey:@"cover"]];
 }
 
 @end

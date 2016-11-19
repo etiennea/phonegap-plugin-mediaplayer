@@ -130,7 +130,7 @@
 - (void) stop:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        [audioPlayer clear];
+        [audioPlayer stop];
         [self succeedWithTrackId:command andFireEvent:@"stop"];
     }];
 }
@@ -218,7 +218,7 @@
     //Sends trackid
     if(![trackingUrl  isEqual: @"test"]){
         NSLog(@"play tracking");
-        NSString *currentTrack = [audioPlayer getCurrentItem];
+        NSString *currentTrack = @"";//[audioPlayer getCurrentTrack];
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
         [request setHTTPMethod:@"GET"];
         [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@", trackingUrl, currentTrack]]];
@@ -248,7 +248,7 @@
  */
 - (void) succeedWithTrackId:(CDVInvokedUrlCommand*)command andFireEvent:(NSString*)event
 {
-    NSString* track = [audioPlayer getCurrentItem];
+    NSString* track = @"";//[audioPlayer getCurrentAudio];
     CDVPluginResult *result = [CDVPluginResult
                                resultWithStatus:CDVCommandStatus_OK
                                messageAsString:track];
@@ -270,7 +270,7 @@
  */
 - (void) fireEvent:(NSString*)event
 {
-    NSString* track  = [audioPlayer getCurrentItem];
+    NSString* track  = @"";//[audioPlayer getCurrentTrack];
     NSString* params = [NSString stringWithFormat:@"\"%@\"", track];
 
     NSString* js;

@@ -21,15 +21,15 @@
  * @APPPLANT_LICENSE_HEADER_END@
  */
 
-@interface APPAudio : NSObject 
+@interface APPAudio : NSObject
 
 - (id) initWithDict:(NSDictionary*)dict;
 
-@property (readonly, getter=id) NSString* id;
-@property (readonly, getter=title) NSString* title;
-@property (readonly, getter=album) NSString* album;
-@property (readonly, getter=artist) NSString* artist;
-@property (readonly, getter=file) NSString* file;
-@property (readonly, getter=cover) NSString* cover;
+@property (readonly, getter=id)       NSString* id;
+@property (readonly, getter=title)    NSString* title;
+@property (readonly, getter=album)    NSString* album;
+@property (readonly, getter=artist)   NSString* artist;
+@property (readonly, getter=file)     NSURL* file;
+@property (readonly, getter=cover)    NSURL* cover;
 
 @end

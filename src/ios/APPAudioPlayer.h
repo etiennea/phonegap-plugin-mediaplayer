@@ -25,28 +25,30 @@
  *
  * @APPPLANT_LICENSE_HEADER_END@
  */
-#import <AVFoundation/AVFoundation.h>
+
 #import "APPAudio.h"
 
 @protocol APPAudioPlayerDelegate <NSObject>
 
-- (void) didFinishPlayingAudio;
+- (void) didFailPlayingAudio:(APPAudio*)audio;
+- (void) didStartPlayingAudio:(APPAudio*)audio;
+- (void) didPausePlayingAudio:(APPAudio*)audio;
+- (void) didFinishPlayingAudio:(APPAudio*)audio;
+- (void) didStopPlayingAudio:(APPAudio*)audio;
 
 @end
 
 @interface APPAudioPlayer : NSObject
 
--(void)queue:(APPAudio*) song play:(BOOL)startPlaying replace:(BOOL)replaceFlag;
--(void)playNext;
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId;
--(void)pause;
--(void)addNextURLWithString:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId;
+-(void)queue:(APPAudio*)song play:(BOOL)startPlaying replace:(BOOL)replaceFlag;
 -(void)play;
--(void)clear;
+-(void)playNext;
+-(void)pause;
+-(void)stop;
 -(void)fadeOutVolume;
 -(void)fadeInVolume;
 
-@property (nonatomic, copy) NSString *getCurrentItem;
+@property (readonly, getter=getCurrentAudio) APPAudio* currentAudio;
 @property (nonatomic, assign) id<APPAudioPlayerDelegate> delegate;
 
 @end

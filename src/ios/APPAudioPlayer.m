@@ -1,15 +1,32 @@
-//
-//  GBBackgroundAudioPlayer.m
-//  audioplayer
-//
-//  Created by Vadim Fainshtein on 1/16/14.
-//  Updated by Etienne Adriaenssen 06/10/15
-//
-//   MIT
-//
+/*
+ * Copyright (c) 2013-2016 by appPlant GmbH. All rights reserved.
+ *
+ * APPAudioPlayer.m
+ *
+ * Created by Vadim Fainshtein    on 01/16/14.
+ * Updated by Etienne Adriaenssen on 06/10/15.
+ *
+ * @APPPLANT_LICENSE_HEADER_START@
+ *
+ * This file contains Original Code and/or Modifications of Original Code
+ * as defined in and that are subject to the Apache License
+ * Version 2.0 (the 'License'). You may not use this file except in
+ * compliance with the License. Please obtain a copy of the License at
+ * http://opensource.org/licenses/Apache-2.0/ and read it before using this
+ * file.
+ *
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ * Please see the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * @APPPLANT_LICENSE_HEADER_END@
+ */
 
 #import "APPAudioPlayer.h"
-#import "APPAudio.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
@@ -17,374 +34,462 @@
     AVQueuePlayer* player;
 }
 
-@property (nonatomic, strong) id playerObserver;
-@property (nonatomic, strong) id playerItem;
+// Contains all queued audio objects
+@property (nonatomic, strong) NSMutableDictionary* songs;
 
 @end
 
 @implementation APPAudioPlayer;
 
-NSString *KVOcontext = @"GBAudioPlayer";
-NSString *currentItem = @"0";
-int currentIndex = 1;
-NSMutableArray *done = nil;
+#pragma mark -
+#pragma mark Life Cycle
 
-NSMutableArray *titles = nil;
-NSMutableArray *artists = nil;
-NSMutableArray *albums = nil;
-NSMutableArray *ids = nil;
-NSMutableArray *imgs = nil;
-
-
-
-- (id) init{
+/**
+ * @abstract Setup audio and observers.
+ *
+ * @return [ Void ]
+ */
+- (id) init
+{
     self = [super init];
 
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-    [[AVAudioSession sharedInstance] setActive: YES error: nil];
+    [self observeCommandCenter];
+    [self observeNotificationCenter];
+    [self setupAudioSession];
+    [self setupAudioPlayer];
 
-    //This code manages the remote play pause buttons
-    MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
-    [commandCenter.pauseCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        NSLog(@"toggle button pressed");
-        [self pause];
-        return MPRemoteCommandHandlerStatusSuccess;
-    }];
-
-    [commandCenter.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        NSLog(@"toggle button pressed");
-        [self play];
-        return MPRemoteCommandHandlerStatusSuccess;
-    }];
-    //end remote
-
-    //trigger javascript next
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinish) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAudioSessionEvent:) name:AVAudioSessionInterruptionNotification object:nil];
-
-    //initialize data-arrays
-    titles = [NSMutableArray array];
-    artists = [NSMutableArray array];
-    albums = [NSMutableArray array];
-    imgs = [NSMutableArray array];
-    ids = [NSMutableArray array];
-    done = [NSMutableArray array];
-
-    currentIndex = 1;
-
-    player = [[AVQueuePlayer alloc]init];
-    player.actionAtItemEnd = AVPlayerActionAtItemEndAdvance;
-
-    player.allowsExternalPlayback = TRUE;
-
-    player.volume = 1.0f;
-    [player addObserver:self forKeyPath:@"status" options:0 context:nil];
+    _songs = [NSMutableDictionary dictionary];
 
     return self;
 }
 
--(void)queue:(APPAudio*) song play:(BOOL)startPlaying replace:(BOOL)replaceFlag{
+/**
+ * @abstract Cleanup memory.
+ *
+ * @return [ Void ]
+ */
+- (void) dealloc
+{
+    [player removeObserver:self forKeyPath:@"status" context:NULL];
+    [player removeObserver:self forKeyPath:@"currentItem" context:NULL];
+    [player removeObserver:self forKeyPath:@"timeControlStatus" context:NULL];
 
-    NSURL *url=[NSURL URLWithString:[song file]];
-    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
-    self.playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 
-    [player insertItem:self.playerItem afterItem:nil];
+    player = NULL;
+    _songs = NULL;
+}
 
-    //assets
-    [titles addObject:[song title]];
-    [artists addObject:[song artist]];
-    [albums addObject:[song album]];
-    [imgs addObject:[song cover]];
-    [ids addObject:[song id]];
+#pragma mark -
+#pragma mark Init
+
+/**
+ * @abstract Setup playback for audio session.
+ *
+ * @return [ Void ]
+ */
+- (void) setupAudioSession
+{
+    [[AVAudioSession sharedInstance]
+     setCategory:AVAudioSessionCategoryPlayback error:NULL];
+
+    [[AVAudioSession sharedInstance]
+     setActive:YES error:NULL];
+}
+
+/**
+ * @abstract Setup audio player.
+ *
+ * @return [ Void ]
+ */
+- (void) setupAudioPlayer
+{
+    player = [[AVQueuePlayer alloc] init];
+
+    player.allowsExternalPlayback = TRUE;
+    player.actionAtItemEnd        = AVPlayerActionAtItemEndAdvance;
+    player.volume                 = 1.0f;
+
+    [player addObserver:self forKeyPath:@"status" options:0 context:NULL];
+    [player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:NULL];
+    [player addObserver:self forKeyPath:@"timeControlStatus" options:NSKeyValueObservingOptionNew context:NULL];
+}
+
+/**
+ * @abstract Observe the notification center to react on certain events.
+ *
+ * @return [ Void ]
+ */
+- (void) observeNotificationCenter
+{
+    NSNotificationCenter* center = [NSNotificationCenter
+                                    defaultCenter];
+
+    [center addObserver:self
+               selector:@selector(didFinishPlayingAudio:)
+                   name:AVPlayerItemDidPlayToEndTimeNotification
+                 object:NULL];
+
+    [center addObserver:self
+               selector:@selector(didFailPlayingAudio:)
+                   name:AVPlayerItemFailedToPlayToEndTimeNotification
+                 object:NULL];
+
+    [center addObserver:self
+               selector:@selector(onAudioSessionEvent:)
+                   name:AVAudioSessionInterruptionNotification
+                 object:NULL];
+}
+
+/**
+ * @abstract Observe the remote play pause buttons.
+ *
+ * @return [ Void ]
+ */
+- (void) observeCommandCenter
+{
+    MPRemoteCommandCenter *center = [MPRemoteCommandCenter
+                                     sharedCommandCenter];
+
+    [center.pauseCommand addTargetWithHandler:
+     ^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* e) {
+        [self pause];
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+
+    [center.playCommand addTargetWithHandler:
+     ^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* e) {
+        [self play];
+        return MPRemoteCommandHandlerStatusSuccess;
+     }];
+
+    [center.stopCommand addTargetWithHandler:
+     ^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* e) {
+         [self stop];
+         return MPRemoteCommandHandlerStatusSuccess;
+     }];
+
+    [center.nextTrackCommand addTargetWithHandler:
+     ^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* e) {
+         [self playNext];
+         return MPRemoteCommandHandlerStatusSuccess;
+     }];
+}
+
+#pragma mark -
+#pragma mark Interface
+
+/**
+ * @abstract Get the current song.
+ *
+ * @return [ APPAudio ]
+ */
+- (APPAudio*) getCurrentAudio
+{
+    return [_songs valueForKey:player.currentItem.description];
+}
+
+/**
+ * @abstract Add the song to the queue.
+ *
+ * @param [ APPAudio ] song The audio song to add to the queue.
+ * @param [ Bool ] play Set to true to start playing at the current position
+ *                      of the queue.
+ * @param [ Bool ] replace Set to true to clear the queue before.
+ *
+ * @return [ Void ]
+ */
+- (void) queue:(APPAudio*)song play:(BOOL)startPlaying replace:(BOOL)replaceFlag
+{
+    if (replaceFlag) {
+        [self resetPlayerAndInformDelegate:NO];
+    }
+
+    [self addAudio:song];
 
     if (startPlaying) {
         [self play];
     }
-
-
 }
 
--(void)didFinish{
-    NSLog(@"did finish javascript");
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_delegate didFinishPlayingAudio];
-}
-
-- (void) onAudioSessionEvent: (NSNotification *) notification
+/**
+ * @abstract Start or resume the audio player and inform the delegate
+ * by invoking didStartPlayingAudio.
+ *
+ * @return [ Void ]
+ */
+- (void) play
 {
-    //Check the type of notification, especially if you are sending multiple AVAudioSession events here
-    if ([notification.name isEqualToString:AVAudioSessionInterruptionNotification]) {
-        NSLog(@"Interruption notification received!");
-
-        //Check to see if it was a Begin interruption
-        if ([[notification.userInfo valueForKey:AVAudioSessionInterruptionTypeKey] isEqualToNumber:[NSNumber numberWithInt:AVAudioSessionInterruptionTypeBegan]]) {
-            NSLog(@"Interruption began!");
-
-        } else {
-            NSLog(@"Interruption ended!");
-            //Resume your audio
-            [player play];
-        }
-    }
-}
-
--(void)addNextURLWithString:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId{
-    //NSLog(@"url:%@",urlString);
-
-    NSURL *url=[NSURL URLWithString:urlString];
-    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
-    self.playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
-
-    [player insertItem:self.playerItem afterItem:nil];
-
-    //assets
-    [titles addObject:songTitle];
-    [artists addObject:artistName];
-    [albums addObject:albumTitle];
-    [imgs addObject:Img];
-    [ids addObject:trackId];
-
-}
-
-
--(void)playURL:(NSString*) urlString withSongTitle:(NSString*)songTitle andAlbumTitle:(NSString*)albumTitle andArtistName:(NSString*)artistName andImg:(NSString*)Img andTrackId:(NSString*)trackId{
-
-    titles = [NSMutableArray arrayWithObjects: songTitle, nil];
-    artists = [NSMutableArray arrayWithObjects: artistName, nil];
-    albums = [NSMutableArray arrayWithObjects: albumTitle, nil];
-    imgs = [NSMutableArray arrayWithObjects: Img, nil];
-    ids = [NSMutableArray arrayWithObjects: trackId, nil];
-    done = [NSMutableArray arrayWithObjects: @"test", nil];
-
-    currentIndex = 1;
-
-    NSURL *url = [NSURL URLWithString:Img];
-    NSURLSessionDownloadTask *downloadPhotoTask = [[NSURLSession sharedSession] downloadTaskWithURL:url completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-        UIImage *image = [UIImage imageWithData: [NSData dataWithContentsOfURL:location]];
-        MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
-        NSDictionary *nowPlaying = @{
-                                     MPMediaItemPropertyTitle: songTitle,
-                                     MPMediaItemPropertyArtist: artistName,
-                                     MPMediaItemPropertyAlbumTitle: albumTitle,
-                                     MPMediaItemPropertyArtwork: artwork
-                                     };
-        [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
-    }];
-    [downloadPhotoTask resume];
-
-    [player removeAllItems];
-    if (player != nil && ![currentItem isEqual: @"0"])
-        [player removeObserver:self forKeyPath:@"currentItem"];
-    [self addNextURLWithString:urlString withSongTitle:songTitle andAlbumTitle:albumTitle andArtistName:artistName andImg:Img andTrackId:trackId];
-    [self play];
-    [player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:&KVOcontext];
-    currentItem = trackId;
-
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-
-    if (context == &KVOcontext) {
-        //AVPlayerItem *playerItem = [player currentItem];
-        NSLog(@"T %@ / %@, Code %i", [ids objectAtIndex:currentIndex], currentItem, currentIndex);
-        NSLog(@"bool %i", [done containsObject:currentItem]);
-        //if (player.status == AVPlayerStatusReadyToPlay) {
-
-        //[ids objectAtIndex:currentIndex] == currentItem &&
-
-            if([done containsObject:currentItem] == 0){
-
-                [done addObject:currentItem];
-                  currentIndex = currentIndex + 1;
-             currentItem = [ids objectAtIndex:currentIndex];
-
-                if((currentIndex + 1) < [ids count]){
-
-
-//                    //UIImage *image2 = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString: [imgs objectAtIndex:currentIndex]]]];
-//                    //MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:image2];
-//                    NSDictionary *nowPlaying = @{MPMediaItemPropertyTitle: [titles objectAtIndex:currentIndex],
-//                                                 MPMediaItemPropertyArtist: [artists objectAtIndex:currentIndex],
-//                                                 MPMediaItemPropertyAlbumTitle: [albums objectAtIndex:currentIndex],
-//                                                 //MPMediaItemPropertyArtwork: artwork
-//                                                 };
-//                    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
-//
-                    NSURL *url = [NSURL URLWithString: [imgs objectAtIndex:currentIndex]];
-                    NSURLSessionDownloadTask *downloadPhotoTask = [[NSURLSession sharedSession] downloadTaskWithURL:url completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                        UIImage *image = [UIImage imageWithData: [NSData dataWithContentsOfURL:location]];
-                        MPMediaItemArtwork* artwork =   [[MPMediaItemArtwork alloc]initWithImage:image];
-                        NSDictionary *nowPlaying = @{
-                                                     MPMediaItemPropertyTitle: [titles objectAtIndex:currentIndex],
-                                                     MPMediaItemPropertyArtist: [artists objectAtIndex:currentIndex],
-                                                     MPMediaItemPropertyAlbumTitle: [albums objectAtIndex:currentIndex],
-                                                     MPMediaItemPropertyArtwork: artwork
-                                                     };
-                        [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:nowPlaying];
-                    }];
-                    [downloadPhotoTask resume];
-
-                } else {
-                    currentItem = @"end";
-                }
-            }
-        //}
-    }
-}
-
--(NSString *)getCurrentItem{
-    return currentItem;
-}
-
--(void)play{
     [player play];
-    //[_delegate didPlay]; //should fire event to be able to update interface accordingly
 }
 
--(void)clear{
-    NSLog(@"clearqueue");
-    done = [NSMutableArray arrayWithObjects: @"test", nil];
-    currentIndex = 0;
-    [player removeAllItems];
-
-}
-
--(void)playNext{
-    NSLog(@"playNext");
-    currentIndex = currentIndex + 1;
+/**
+ * @abstract Jump to the next available song.
+ *
+ * @return [ Void ]
+ */
+- (void) playNext
+{
     [player advanceToNextItem];
 }
 
--(void)pause{
+/**
+ * @abstract Pause the audio player and inform the delegate
+ * by invoking didPausePlayingAudio.
+ *
+ * @return [ Void ]
+ */
+- (void) pause
+{
     [player pause];
-    //[_delegate didPause]; //should fire event to be able to update interface accordingly
 }
 
--(void)fadeOutVolume
+/**
+ * @abstract Stop the audio player and remove all queued songs.
+ *
+ * @return [ Void ]
+ */
+- (void) stop
 {
-    NSLog(@"fadeOutTest");
-    AVPlayerItem *myAVPlayerItem = player.currentItem;
-    AVAsset *myAVAsset = myAVPlayerItem.asset;
-    NSArray *audioTracks = [myAVAsset tracksWithMediaType:AVMediaTypeAudio];
+    [self resetPlayerAndInformDelegate:YES];
+}
 
-    NSMutableArray *allAudioParams = [NSMutableArray array];
-    for (AVAssetTrack *track in audioTracks) {
+/**
+ * @abstract Transit volume from 1 to 0.
+ *
+ * @return [ Void ]
+ */
+- (void) fadeOutVolume
+{
+    [self setVolumeFromStartVolume:1.0 toEndVolume:0.0];
+}
 
-        AVMutableAudioMixInputParameters *audioInputParams = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
-        [audioInputParams setVolumeRampFromStartVolume:1.0 toEndVolume:0 timeRange:CMTimeRangeMake(CMTimeMake(0, 1), CMTimeMake(5, 1))];
-        [allAudioParams addObject:audioInputParams];
+/**
+ * @abstract Transit volume from 0 to 1.
+ *
+ * @return [ Void ]
+ */
+- (void) fadeInVolume
+{
+    [self setVolumeFromStartVolume:0.0 toEndVolume:1.0];
+}
+
+#pragma mark -
+#pragma mark Internal
+
+/**
+ * @abstract Add audio to the queue.
+ *
+ * @param [ APPAudio ] song The audio to add.
+ *
+ * @return [ Void ]
+ */
+- (void) addAudio:(APPAudio*)song
+{
+    AVURLAsset *asset  = [[AVURLAsset alloc]
+                          initWithURL:song.file options:NULL];
+
+    AVPlayerItem* item = [[AVPlayerItem alloc]
+                          initWithAsset:asset];
+
+    [_songs setValue:song forKey:item.description];
+    [player insertItem:item afterItem:NULL];
+}
+
+/**
+ * @abstract Remove all queued songs.
+ *
+ * @return [ Void ]
+ */
+- (void) resetPlayerAndInformDelegate:(BOOL)eventFlag
+{
+    [player removeAllItems];
+    [_songs removeAllObjects];
+
+    if (eventFlag && [self delegateRespondsTo:@selector(didStopPlayingAudio:)]) {
+        [_delegate didStopPlayingAudio:self.currentAudio];
+    }
+}
+
+/**
+ * @abstract Sets a volume ramp to apply during the specified timeRange.
+ *
+ * @param [ Float ] startVolume The volume where to start from.
+ * @param [ Float ] endVolume The volume where to end.
+ *
+ * @return [ Void ]
+ */
+- (void) setVolumeFromStartVolume:(float)startVolume toEndVolume:(float)endVolume
+{
+    AVPlayerItem* playerItem    = player.currentItem;
+    AVAsset* asset              = playerItem.asset;
+    NSArray* tracks             = [asset tracksWithMediaType:AVMediaTypeAudio];
+    NSMutableArray* audioParams = [NSMutableArray array];
+
+    for (AVAssetTrack* track in tracks)
+    {
+        CMTimeRange range = CMTimeRangeMake(CMTimeMake(0, 1), CMTimeMake(5, 1));
+
+        AVMutableAudioMixInputParameters* params =
+        [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
+
+        [params setVolumeRampFromStartVolume:startVolume
+                                 toEndVolume:endVolume
+                                   timeRange:range];
+
+        [audioParams addObject:params];
 
     }
 
-    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
-    [audioMix setInputParameters:allAudioParams];
-    [myAVPlayerItem setAudioMix:audioMix];
+    AVMutableAudioMix* audioMix = [AVMutableAudioMix audioMix];
+    [audioMix setInputParameters:audioParams];
+    [playerItem setAudioMix:audioMix];
 }
 
--(void)fadeInVolume
+/**
+ * @abstract Set the current now playing info for the center.
+ *
+ * @param [ APPAudio ] song Contains all infos about the song.
+ *                          Setting to nil will clear it.
+ *
+ * @return [ Void ]
+ */
+- (void) setNowPlayingInfo:(APPAudio*)song
 {
-    NSLog(@"fadeInTest");
-    AVPlayerItem *myAVPlayerItem = player.currentItem;
-    AVAsset *myAVAsset = myAVPlayerItem.asset;
-    NSArray *audioTracks = [myAVAsset tracksWithMediaType:AVMediaTypeAudio];
+    NSURLSession* http = [NSURLSession sharedSession];
+    NSURLSessionDownloadTask* downloadCoverTask;
 
-    NSMutableArray *allAudioParams = [NSMutableArray array];
-    for (AVAssetTrack *track in audioTracks) {
-
-        AVMutableAudioMixInputParameters *audioInputParams = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
-        [audioInputParams setVolumeRampFromStartVolume:0 toEndVolume:1.0 timeRange:CMTimeRangeMake(CMTimeMake(0, 1), CMTimeMake(5, 1))];
-        [allAudioParams addObject:audioInputParams];
-
+    if (!song) {
+        [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:NULL];
+        return;
     }
 
-    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
-    [audioMix setInputParameters:allAudioParams];
-    [myAVPlayerItem setAudioMix:audioMix];
+    NSDictionary* nowPlaying = @{
+                                 MPMediaItemPropertyTitle: song.title,
+                                 MPMediaItemPropertyArtist: song.artist,
+                                 MPMediaItemPropertyAlbumTitle: song.album
+                                 };
+
+    [[MPNowPlayingInfoCenter defaultCenter]
+     setNowPlayingInfo:nowPlaying];
+
+    downloadCoverTask = [http downloadTaskWithURL:song.cover completionHandler:^(NSURL* url, NSURLResponse* res, NSError* e) {
+        NSData* data = [NSData dataWithContentsOfURL:url];
+        UIImage* img = [UIImage imageWithData:data];
+
+        MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc]
+                                       initWithImage:img];
+
+        NSMutableDictionary* nowPlayingWithArtwork = [nowPlaying mutableCopy];
+        [nowPlayingWithArtwork setValue:artwork
+                                 forKey:MPMediaItemPropertyArtwork];
+
+        [[MPNowPlayingInfoCenter defaultCenter]
+         setNowPlayingInfo:nowPlayingWithArtwork];
+    }];
+
+    [downloadCoverTask resume];
 }
 
-//- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-//    NSLog(@"observer player:%ld",(long)player.status);
-//    NSLog(@"observer playeritem:%ld",(long)player.currentItem.status);
-//
-//    if (object == player && [keyPath isEqualToString:@"status"]) {
-//        if (player.status == AVPlayerStatusReadyToPlay) {
-//            NSLog(@"player status:%ld",(long)player.status);
-//
-//        } else if (player.status == AVPlayerStatusFailed) {
-//            NSLog(@"AVPlayerStatusFailed");
-//        }
-//    } else  if ([object isKindOfClass:[AVPlayerItem class]] && [keyPath isEqualToString:@"status"]) {
-//        if (player.currentItem.status == AVPlayerStatusReadyToPlay) {
-//            // [player play];
-//            NSLog(@"playeritem status:%ld",(long)player.currentItem.status);
-//
-//        } else if (player.status == AVPlayerStatusFailed) {
-//            NSLog(@"AVPlayerStatusFailed");
-//        }
-//    }
-//}
-
-
-
-- (void)dealloc {
-    //[self.playerItem removeObserver:self forKeyPath:@"status" context:nil];
-    [player removeObserver:self forKeyPath:@"status" context:nil];
-}
-
-- (NSString *)OSStatusToStr:(OSStatus)st
+/**
+ * @abstract Check if the delegate has implemented the specified method.
+ *
+ * @param [ SEL ] event The selector to check for implementation.
+ *
+ * @return [ Bool ]
+ */
+- (BOOL) delegateRespondsTo:(SEL)event
 {
-    switch (st) {
-        case kAudioFileUnspecifiedError:
-            return @"kAudioFileUnspecifiedError";
+    return (_delegate && [_delegate respondsToSelector:event]);
+}
 
-        case kAudioFileUnsupportedFileTypeError:
-            return @"kAudioFileUnsupportedFileTypeError";
+#pragma mark -
+#pragma mark Callbacks
 
-        case kAudioFileUnsupportedDataFormatError:
-            return @"kAudioFileUnsupportedDataFormatError";
+/**
+ * @abstract Invoked by observing the notifcation center.
+ *
+ * @return [ Void ]
+ */
+- (void) didFinishPlayingAudio
+{
+    if ([self delegateRespondsTo:@selector(didFinishPlayingAudio:)]) {
+        [_delegate didFinishPlayingAudio:self.currentAudio];
+    }
+}
 
-        case kAudioFileUnsupportedPropertyError:
-            return @"kAudioFileUnsupportedPropertyError";
+/**
+ * @abstract Invoked by observing the notifcation center.
+ *
+ * @return [ Void ]
+ */
+- (void) didFailPlayingAudio
+{
+    if ([self delegateRespondsTo:@selector(didFailPlayingAudio:)]) {
+        [_delegate didFailPlayingAudio:self.currentAudio];
+    }
+}
 
-        case kAudioFileBadPropertySizeError:
-            return @"kAudioFileBadPropertySizeError";
+/**
+ * @abstract Will be notified when the system has interrupted the audio session
+ * and when the interruption has ended.
+ *
+ * @param [ NSNotification ] notification Check the notification's userInfo
+ *                                        dictionary for the interruption type.
+ *
+ * @return [ Void ]
+ */
+- (void) onAudioSessionEvent:(NSNotification*)notification
+{
+    if (![notification.name isEqualToString:AVAudioSessionInterruptionNotification])
+        return;
 
-        case kAudioFilePermissionsError:
-            return @"kAudioFilePermissionsError";
+    id interruptType = [notification.userInfo
+                        valueForKey:AVAudioSessionInterruptionTypeKey];
 
-        case kAudioFileNotOptimizedError:
-            return @"kAudioFileNotOptimizedError";
+    NSNumber* typeEnd = [NSNumber numberWithInt:
+                        AVAudioSessionInterruptionTypeEnded];
 
-        case kAudioFileInvalidChunkError:
-            return @"kAudioFileInvalidChunkError";
+    if (![interruptType isEqualToNumber:typeEnd])
+        return;
 
-        case kAudioFileDoesNotAllow64BitDataSizeError:
-            return @"kAudioFileDoesNotAllow64BitDataSizeError";
+    // Resume audio
+    [player play];
+}
 
-        case kAudioFileInvalidPacketOffsetError:
-            return @"kAudioFileInvalidPacketOffsetError";
+/**
+ * @abstract Called by the player whenever the value of the status property or
+ * currentItem property has been changed.
+ *
+ * @param [ NSString ] keyPath The name of the changed property.
+ *
+ * @return [ Void ]
+ */
+- (void) observeValueForKeyPath:(NSString*)keyPath
+                       ofObject:(id)object
+                         change:(NSDictionary*)change
+                        context:(void*)context {
 
-        case kAudioFileInvalidFileError:
-            return @"kAudioFileInvalidFileError";
+    APPAudio* audio = self.currentAudio;
 
-        case kAudioFileOperationNotSupportedError:
-            return @"kAudioFileOperationNotSupportedError";
+    if ([keyPath isEqualToString:@"currentItem"]) {
+        [self setNowPlayingInfo:audio];
+    }
 
-        case kAudioFileNotOpenError:
-            return @"kAudioFileNotOpenError";
+    if (!audio)
+        return;
 
-        case kAudioFileEndOfFileError:
-            return @"kAudioFileEndOfFileError";
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
+        if ([self delegateRespondsTo:@selector(didPausePlayingAudio:)]) {
+            [_delegate didPausePlayingAudio:audio];
+        }
+    } else
 
-        case kAudioFilePositionError:
-            return @"kAudioFilePositionError";
-
-        case kAudioFileFileNotFoundError:
-            return @"kAudioFileFileNotFoundError";
-
-        default:
-            return @"unknown error";
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying &&
+        player.status == AVPlayerStatusReadyToPlay) {
+        if ([self delegateRespondsTo:@selector(didStartPlayingAudio:)]) {
+            [_delegate didStartPlayingAudio:audio];
+        }
     }
 }
 
