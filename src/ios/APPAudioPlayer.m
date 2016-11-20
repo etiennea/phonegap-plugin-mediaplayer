@@ -411,6 +411,30 @@
  *
  * @return [ Void ]
  */
+- (void) didStartPlayingAudio
+{
+    if ([self delegateRespondsTo:@selector(didStartPlayingAudio:)]) {
+        [_delegate didStartPlayingAudio:self.currentAudio];
+    }
+}
+
+/**
+ * @abstract Invoked by observing the notifcation center.
+ *
+ * @return [ Void ]
+ */
+- (void) didPausePlayingAudio
+{
+    if ([self delegateRespondsTo:@selector(didPausePlayingAudio:)]) {
+        [_delegate didPausePlayingAudio:self.currentAudio];
+    }
+}
+
+/**
+ * @abstract Invoked by observing the notifcation center.
+ *
+ * @return [ Void ]
+ */
 - (void) didFinishPlayingAudio
 {
     if ([self delegateRespondsTo:@selector(didFinishPlayingAudio:)]) {
@@ -480,16 +504,10 @@
         return;
 
     if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
-        if ([self delegateRespondsTo:@selector(didPausePlayingAudio:)]) {
-            [_delegate didPausePlayingAudio:audio];
-        }
+        [self didPausePlayingAudio];
     } else
-
-    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying &&
-        player.status == AVPlayerStatusReadyToPlay) {
-        if ([self delegateRespondsTo:@selector(didStartPlayingAudio:)]) {
-            [_delegate didStartPlayingAudio:audio];
-        }
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
+        [self didStartPlayingAudio];
     }
 }
 
