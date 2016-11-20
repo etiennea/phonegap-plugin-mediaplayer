@@ -377,15 +377,17 @@
         NSData* data = [NSData dataWithContentsOfURL:url];
         UIImage* img = [UIImage imageWithData:data];
 
-        MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc]
-                                       initWithImage:img];
-
-        NSMutableDictionary* nowPlayingWithArtwork = [nowPlaying mutableCopy];
-        [nowPlayingWithArtwork setValue:artwork
-                                 forKey:MPMediaItemPropertyArtwork];
-
-        [[MPNowPlayingInfoCenter defaultCenter]
-         setNowPlayingInfo:nowPlayingWithArtwork];
+        if (img) {
+            MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc]
+                                           initWithImage:img];
+            
+            NSMutableDictionary* nowPlayingWithArtwork = [nowPlaying mutableCopy];
+            [nowPlayingWithArtwork setValue:artwork
+                                     forKey:MPMediaItemPropertyArtwork];
+            
+            [[MPNowPlayingInfoCenter defaultCenter]
+             setNowPlayingInfo:nowPlayingWithArtwork];
+        }
     }];
 
     [downloadCoverTask resume];
