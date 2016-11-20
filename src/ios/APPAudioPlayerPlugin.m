@@ -248,10 +248,11 @@
  */
 - (void) succeedWithTrackId:(CDVInvokedUrlCommand*)command andFireEvent:(NSString*)event
 {
-    NSString* track = @"";//[audioPlayer getCurrentAudio];
+    APPAudio* audio = audioPlayer.currentAudio;
+    NSString* song  = audio ? [audio encodeToJSON] : NULL;
     CDVPluginResult *result = [CDVPluginResult
                                resultWithStatus:CDVCommandStatus_OK
-                               messageAsString:track];
+                               messageAsString:song];
 
     [self.commandDelegate sendPluginResult:result
                                 callbackId:command.callbackId];
@@ -270,8 +271,9 @@
  */
 - (void) fireEvent:(NSString*)event
 {
-    NSString* track  = @"";//[audioPlayer getCurrentTrack];
-    NSString* params = [NSString stringWithFormat:@"\"%@\"", track];
+    APPAudio* audio  = audioPlayer.currentAudio;
+    NSString* song   = audio ? [audio encodeToJSON] : NULL;
+    NSString* params = [NSString stringWithFormat:@"\"%@\"", song];
 
     NSString* js;
     js = [NSString stringWithFormat:

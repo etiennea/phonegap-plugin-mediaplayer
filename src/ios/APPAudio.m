@@ -102,4 +102,25 @@
     return [NSURL URLWithString:[dict objectForKey:@"cover"]];
 }
 
+#pragma mark -
+#pragma mark Methods
+
+/**
+ * Encode the user info dict to JSON.
+ */
+- (NSString*) encodeToJSON
+{
+    NSData* data;
+    data = [NSJSONSerialization dataWithJSONObject:dict
+                                           options:NSJSONWritingPrettyPrinted
+                                             error:NULL];
+
+    NSString* json;
+    json = [[NSString alloc] initWithData:data
+                                 encoding:NSUTF8StringEncoding];
+
+    return [json stringByReplacingOccurrencesOfString:@"\n"
+                                           withString:@""];
+}
+
 @end

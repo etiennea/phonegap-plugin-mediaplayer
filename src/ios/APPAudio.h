@@ -24,6 +24,7 @@
 @interface APPAudio : NSObject
 
 - (id) initWithDict:(NSDictionary*)dict;
+- (NSString*) encodeToJSON;
 
 @property (readonly, getter=id)       NSString* id;
 @property (readonly, getter=title)    NSString* title;
