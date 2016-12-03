@@ -103,17 +103,25 @@ cordova.plugins.audioPlayer.play(song, callbackFunc);
 
 
 ### Queue a song
-Append a song object to the existing queue (Initialize a new one if there is none).
+Append one ore more song objects to the existing queue (Initialize a new one if there is none).
 It's possible to replace the existing playlist by setting the replace flag to true.
 If play is set to true the playback is started on appending the track. 
 
 ```javascript
-var song = {
+var song1 = {
     id: '22',
     title: 'California Lullabye',
     album: 'The Beautiful Machine',
     artist: 'Josh Woodward',
     file: 'https://www.joshwoodward.com/mp3/JoshWoodward-TheBeautifulMachine-01-CaliforniaLullabye.mp3',
+    cover: 'https://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg'
+}
+var song2 = {
+    id: '11',
+    title: 'Let it in',
+    album: 'Ashes',
+    artist: 'Josh Woodward',
+    file: 'https://www.joshwoodward.com/mp3/Ashes/JoshWoodward-Ashes-01-LetItIn.mp3',
     cover: 'https://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg'
 }
 
@@ -130,7 +138,7 @@ var options = {
     play: false,
 };
 
-cordova.plugins.audioPlayer.queue(song, options, callbackFunc, failureCallback);
+cordova.plugins.audioPlayer.queue([song1, song2], options, callbackFunc, failureCallback);
 
 ```
 
