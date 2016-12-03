@@ -145,17 +145,26 @@
 - (void) queue:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSDictionary* song = [command.arguments objectAtIndex:0];
+        NSArray* songs = [command.arguments objectAtIndex:0];
         NSDictionary* opts = [command.arguments objectAtIndex:1];
 
-        NSAssert(song != nil, @"[AudioPlayer] Missing song!");
-        NSAssert(opts != nil, @"[AudioPlayer] Missing opts!");
-
-        APPAudio* audio  = [[APPAudio alloc] initWithDict:song];
         BOOL playFlag    = [[opts objectForKey:@"play"] boolValue];
         BOOL replaceFlag = [[opts objectForKey:@"replace"] boolValue];
 
-        [audioPlayer queue:audio play:playFlag replace:replaceFlag];
+        for (int i = 0; i < [songs count]; i++) {
+            NSDictionary* song = [songs objectAtIndex:i];
+            NSAssert(song != nil, @"[AudioPlayer] Missing song!");
+            NSAssert(opts != nil, @"[AudioPlayer] Missing opts!");
+
+            APPAudio* audio  = [[APPAudio alloc] initWithDict:song];
+
+            //consider flags only for the first item
+            if(i==0){
+                [audioPlayer queue:audio play:playFlag replace:replaceFlag];
+            } else {
+                [audioPlayer queue:audio play:false replace:false];
+            }
+        }
 
         [self succeedWithTrackId:command andFireEvent:@"queue"];
     }];

@@ -84,7 +84,7 @@ exports.playNext = function (callback) {
 /**
  * Add the specified song to the end of the queue.
  *
- * @param [ Object ] song A hash containing all required infos.
+ * @param [ Object ] songs An Array of hashes containing all required information.
  *      id: The tracking ID.
  *      title: The title of the song.
  *      album: The name of the album.
@@ -99,15 +99,31 @@ exports.playNext = function (callback) {
  *
  * @return [ Void ]
  */
-exports.queue = function(song, options, success, failure) {
-    var isValid = exports.isValidSong(song);
+exports.queue = function(songs, options, success, failure) {
+    //transform to array if only one song is passed
+    if (!Array.isArray(songs)) songs = [songs];
 
-    if (!isValid) {
-        failure('Incomplete song');
-        return;
+    var invalidIds = [];
+
+    //validate songObjects
+    songs.forEach(function(songObject, index){
+        var isValid = exports.isValidSong(songObject);
+
+        if (!isValid) {
+            invalidIds.push(index);
+        }
+    });
+
+    //break if invalid songs were passed
+    if (invalidIds.length > 0){
+        var idString = invalidIds.reduce(function(actual, next){
+            return actual + ', ' + next;
+        });
+        failure('Incomplete song(s) at indices: ' + idString);
+    } else {
+        //dispatch cordova action
+        exec(success, failure, 'AudioPlayer', 'queue', [songs, options]);
     }
-
-    exec(success, failure, 'AudioPlayer', 'queue', [song, options]);
 };
 
 /**
