@@ -40,7 +40,7 @@
 
 @interface APPAudioPlayer : NSObject
 
--(void)queue:(APPAudio*)song play:(BOOL)startPlaying replace:(BOOL)replaceFlag;
+-(void)queue:(NSArray*)song play:(BOOL)startPlaying replace:(BOOL)replaceFlag;
 -(void)play;
 -(void)playNext;
 -(void)pause;

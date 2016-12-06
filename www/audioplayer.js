@@ -115,11 +115,8 @@ exports.queue = function(songs, options, success, failure) {
     });
 
     //break if invalid songs were passed
-    if (invalidIds.length > 0){
-        var idString = invalidIds.reduce(function(actual, next){
-            return actual + ', ' + next;
-        });
-        failure('Incomplete song(s) at indices: ' + idString);
+    if (invalidIds.length > 0) {
+        failure('Incomplete song(s) at indices: ' + invalidIds.join(', '));
     } else {
         //dispatch cordova action
         exec(success, failure, 'AudioPlayer', 'queue', [songs, options]);

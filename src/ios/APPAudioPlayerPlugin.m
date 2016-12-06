@@ -266,32 +266,32 @@
     [self fireEvent:@"stop" withAudio:audio];
 }
 
--(void)didFinishPlayingAudio{
-    NSLog(@"didFinishPlayingSong");
-
-    if ([self.webView isKindOfClass:[UIWebView class]]) {
-        [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
-    }
-
-    //Sends trackid
-    if(![trackingUrl  isEqual: @"test"]){
-        NSLog(@"play tracking");
-        NSString *currentTrack = @"";//[audioPlayer getCurrentTrack];
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-        [request setHTTPMethod:@"GET"];
-        [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@", trackingUrl, currentTrack]]];
-
-        NSError *error = [[NSError alloc] init];
-        NSHTTPURLResponse *responseCode = nil;
-
-        //NSData *oResponseData =
-        [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-
-        if([responseCode statusCode] != 200){
-            NSLog(@"Error getting %@, HTTP status code %li", trackingUrl, (long)[responseCode statusCode]);
-        }
-    }
-}
+//-(void)didFinishPlayingAudio{
+//    NSLog(@"didFinishPlayingSong");
+//
+//    if ([self.webView isKindOfClass:[UIWebView class]]) {
+//        [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
+//    }
+//
+//    //Sends trackid
+//    if(![trackingUrl  isEqual: @"test"]){
+//        NSLog(@"play tracking");
+//        NSString *currentTrack = @"";//[audioPlayer getCurrentTrack];
+//        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+//        [request setHTTPMethod:@"GET"];
+//        [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@", trackingUrl, currentTrack]]];
+//
+//        NSError *error = [[NSError alloc] init];
+//        NSHTTPURLResponse *responseCode = nil;
+//
+//        //NSData *oResponseData =
+//        [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+//
+//        if([responseCode statusCode] != 200){
+//            NSLog(@"Error getting %@, HTTP status code %li", trackingUrl, (long)[responseCode statusCode]);
+//        }
+//    }
+//}
 
 #pragma mark -
 #pragma mark Helper

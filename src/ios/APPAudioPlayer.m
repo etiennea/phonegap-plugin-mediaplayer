@@ -30,6 +30,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
+#define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+
 @interface APPAudioPlayer() {
     AVQueuePlayer* player;
 }
@@ -199,13 +201,15 @@
  *
  * @return [ Void ]
  */
-- (void) queue:(APPAudio*)song play:(BOOL)startPlaying replace:(BOOL)replaceFlag
+- (void) queue:(NSArray*)songs play:(BOOL)startPlaying replace:(BOOL)replaceFlag
 {
     if (replaceFlag) {
         [self resetPlayerAndInformDelegate:NO];
     }
 
-    [self addAudio:song];
+    for (APPAudio* song in songs) {
+        [self addAudio:song];
+    }
 
     if (startPlaying) {
         [self play];
@@ -221,6 +225,10 @@
 - (void) play
 {
     [player play];
+    
+    if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
+        [self didStartPlayingAudio];
+    }
 }
 
 /**
@@ -242,6 +250,10 @@
 - (void) pause
 {
     [player pause];
+    
+    if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
+        [self didPausePlayingAudio];
+    }
 }
 
 /**
@@ -306,8 +318,8 @@
     [player removeAllItems];
     [_songs removeAllObjects];
 
-    if (eventFlag && [self delegateRespondsTo:@selector(didStopPlayingAudio:)]) {
-        [_delegate didStopPlayingAudio:self.currentAudio];
+    if (eventFlag) {
+        [self didStopPlayingAudio];
     }
 }
 
@@ -437,7 +449,7 @@
  *
  * @return [ Void ]
  */
-- (void) didFinishPlayingAudio
+- (void) didFinishPlayingAudio:(NSNotification*)notification
 {
     if ([self delegateRespondsTo:@selector(didFinishPlayingAudio:)]) {
         [_delegate didFinishPlayingAudio:self.currentAudio];
@@ -449,7 +461,19 @@
  *
  * @return [ Void ]
  */
-- (void) didFailPlayingAudio
+- (void) didStopPlayingAudio
+{
+    if ([self delegateRespondsTo:@selector(didStopPlayingAudio:)]) {
+        [_delegate didStopPlayingAudio:self.currentAudio];
+    }
+}
+
+/**
+ * @abstract Invoked by observing the notifcation center.
+ *
+ * @return [ Void ]
+ */
+- (void) didFailPlayingAudio:(NSNotification*)notification
 {
     if ([self delegateRespondsTo:@selector(didFailPlayingAudio:)]) {
         [_delegate didFailPlayingAudio:self.currentAudio];
@@ -479,7 +503,6 @@
     if (![interruptType isEqualToNumber:typeEnd])
         return;
 
-    // Resume audio
     [player play];
 }
 
@@ -502,7 +525,7 @@
         [self setNowPlayingInfo:audio];
     }
 
-    if (!audio)
+    if (!audio || SYSTEM_VERSION_LESS_THAN(@"10.0"))
         return;
 
     if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
