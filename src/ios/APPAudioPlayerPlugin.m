@@ -330,12 +330,11 @@
  */
 - (void) fireEvent:(NSString*)event withAudio:(APPAudio*)audio
 {
-    NSString* song   = audio ? [audio encodeToJSON] : NULL;
-    NSString* params = [NSString stringWithFormat:@"\"%@\"", song];
+    NSString* song = audio ? [audio encodeToJSON] : NULL;
 
     NSString* js;
     js = [NSString stringWithFormat:
-          @"cordova.plugins.audioPlayer.fireEvent('%@', %@)", event, params];
+          @"cordova.plugins.audioPlayer.fireEvent('%@', %@)", event, song];
 
     [self.commandDelegate evalJs:js];
 }
