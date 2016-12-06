@@ -69,8 +69,6 @@
     [self.commandDelegate runInBackground:^{
         trackingUrl = [command.arguments objectAtIndex:0];
 
-        NSAssert(trackingUrl != nil, @"[AudioPlayer] Setup failed!");
-
         [self succeedWithTrackId:command andFireEvent:@"setup"];
     }];
 }
@@ -86,7 +84,6 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer play];
-        [self succeedWithTrackId:command andFireEvent:@"play"];
     }];
 }
 
@@ -101,7 +98,6 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer playNext];
-        [self succeedWithTrackId:command andFireEvent:@"next"];
     }];
 }
 
@@ -116,7 +112,6 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer pause];
-        [self succeedWithTrackId:command andFireEvent:@"pause"];
     }];
 }
 
@@ -131,7 +126,6 @@
 {
     [self.commandDelegate runInBackground:^{
         [audioPlayer stop];
-        [self succeedWithTrackId:command andFireEvent:@"stop"];
     }];
 }
 
@@ -145,7 +139,8 @@
 - (void) queue:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSArray* songs = [command.arguments objectAtIndex:0];
+        NSMutableArray* audios = [[NSMutableArray alloc] init];
+        NSArray* songs     = [command.arguments objectAtIndex:0];
         NSDictionary* opts = [command.arguments objectAtIndex:1];
 
         BOOL playFlag    = [[opts objectForKey:@"play"] boolValue];
@@ -153,18 +148,12 @@
 
         for (int i = 0; i < [songs count]; i++) {
             NSDictionary* song = [songs objectAtIndex:i];
-            NSAssert(song != nil, @"[AudioPlayer] Missing song!");
-            NSAssert(opts != nil, @"[AudioPlayer] Missing opts!");
-
-            APPAudio* audio  = [[APPAudio alloc] initWithDict:song];
-
-            //consider flags only for the first item
-            if(i==0){
-                [audioPlayer queue:audio play:playFlag replace:replaceFlag];
-            } else {
-                [audioPlayer queue:audio play:false replace:false];
-            }
+            APPAudio* audio    = [[APPAudio alloc] initWithDict:song];
+            
+            [audios addObject:audio];
         }
+
+        [audioPlayer queue:audios play:playFlag replace:replaceFlag];
 
         [self succeedWithTrackId:command andFireEvent:@"queue"];
     }];
@@ -215,7 +204,67 @@
 }
 
 #pragma mark -
-#pragma mark GBAudioPlayerDelegate
+#pragma mark APPAudioPlayerDelegate
+
+/**
+ * Invoked by audio player if a song failed to play.
+ *
+ * @param [ APPAudio ] The song.
+ *
+ * @return [ Void ]
+ */
+- (void) didFailPlayingAudio:(APPAudio*)audio
+{
+    [self fireEvent:@"fail" withAudio:audio];
+}
+
+/**
+ * Invoked by audio player when started playing a song.
+ *
+ * @param [ APPAudio ] The song.
+ *
+ * @return [ Void ]
+ */
+- (void) didStartPlayingAudio:(APPAudio*)audio
+{
+    [self fireEvent:@"start" withAudio:audio];
+}
+
+/**
+ * Invoked by audio player when paused a song.
+ *
+ * @param [ APPAudio ] The song.
+ *
+ * @return [ Void ]
+ */
+- (void) didPausePlayingAudio:(APPAudio*)audio
+{
+    [self fireEvent:@"pause" withAudio:audio];
+}
+
+/**
+ * Invoked by audio player when finished a song.
+ *
+ * @param [ APPAudio ] The song.
+ *
+ * @return [ Void ]
+ */
+- (void) didFinishPlayingAudio:(APPAudio*)audio
+{
+    [self fireEvent:@"finish" withAudio:audio];
+}
+
+/**
+ * Invoked by audio player when stopped playing songs.
+ *
+ * @param [ APPAudio ] The last playing song.
+ *
+ * @return [ Void ]
+ */
+- (void) didStopPlayingAudio:(APPAudio*)audio
+{
+    [self fireEvent:@"stop" withAudio:audio];
+}
 
 -(void)didFinishPlayingAudio{
     NSLog(@"didFinishPlayingSong");
@@ -267,7 +316,7 @@
                                 callbackId:command.callbackId];
 
     if (event) {
-        [self fireEvent:event];
+        [self fireEvent:event withAudio:audio];
     }
 }
 
@@ -275,12 +324,12 @@
  * Fire the specified event on JS side.
  *
  * @param [ NSString* ] event The name of the event to fire.
+ * @param [ APPAudio* ] audio The current audio.
  *
  * @return [ Void ]
  */
-- (void) fireEvent:(NSString*)event
+- (void) fireEvent:(NSString*)event withAudio:(APPAudio*)audio
 {
-    APPAudio* audio  = audioPlayer.currentAudio;
     NSString* song   = audio ? [audio encodeToJSON] : NULL;
     NSString* params = [NSString stringWithFormat:@"\"%@\"", song];
 
