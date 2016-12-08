@@ -225,7 +225,7 @@
 - (void) play
 {
     [player play];
-    
+
     if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
         [self didStartPlayingAudio];
     }
@@ -250,7 +250,7 @@
 - (void) pause
 {
     [player pause];
-    
+
     if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
         [self didPausePlayingAudio];
     }
@@ -392,11 +392,11 @@
         if (img) {
             MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc]
                                            initWithImage:img];
-            
+
             NSMutableDictionary* nowPlayingWithArtwork = [nowPlaying mutableCopy];
             [nowPlayingWithArtwork setValue:artwork
                                      forKey:MPMediaItemPropertyArtwork];
-            
+
             [[MPNowPlayingInfoCenter defaultCenter]
              setNowPlayingInfo:nowPlayingWithArtwork];
         }
@@ -525,27 +525,14 @@
         [self setNowPlayingInfo:audio];
     }
 
-    if (!audio)
+    if (!audio || SYSTEM_VERSION_LESS_THAN(@"10.0"))
         return;
-    
-    SEL timeControlStatusSelector = NSSelectorFromString(@"timeControlStatus:");
-    
-    if ([player respondsToSelector:(timeControlStatusSelector)])
-    {
-        @try {
-            NSString *status = [player performSelector:timeControlStatusSelector];
-            if (status == [AVPlayerItem performSelector:NSSelectorFromString(@"AVPlayerTimeControlStatusPaused:")]) {
-                [self didPausePlayingAudio];
-            } else
-            if (status == [AVPlayerItem performSelector:NSSelectorFromString(@"AVPlayerTimeControlStatusPlaying:")] && status == [AVPlayerItem performSelector:NSSelectorFromString(@"AVPlayerStatusReadyToPlay:")]) {
-                [self didStartPlayingAudio];
-            }
-        }
-        @catch (NSException *exception) {
-        }
-        @finally {
-        }
 
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
+        [self didPausePlayingAudio];
+    } else
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
+        [self didStartPlayingAudio];
     }
 }
 
