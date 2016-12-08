@@ -60,7 +60,7 @@ exports.play = function (song, callback) {
     var isSongGiven = (typeof song != 'function') && (typeof song != 'undefined');
 
     if (isSongGiven) {
-        exports.queue(song, { replace: false, play: true }, callback);
+        exports.queue(song, { replace: true, play: true }, callback);
     } else {
         callback = song;
         exec(callback, null, 'AudioPlayer', 'play', []);
