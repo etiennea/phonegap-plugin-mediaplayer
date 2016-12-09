@@ -51,6 +51,7 @@
 - (void) pluginInitialize
 {
     audioPlayer = [[APPAudioPlayer alloc] init];
+    trackingUrl = @"";
     audioPlayer.delegate = self;
 }
 
@@ -149,7 +150,7 @@
         for (int i = 0; i < [songs count]; i++) {
             NSDictionary* song = [songs objectAtIndex:i];
             APPAudio* audio    = [[APPAudio alloc] initWithDict:song];
-            
+
             [audios addObject:audio];
         }
 
@@ -227,6 +228,7 @@
  */
 - (void) didStartPlayingAudio:(APPAudio*)audio
 {
+    [self makeRestCall:audio.id withEvent:@"start"];
     [self fireEvent:@"start" withAudio:audio];
 }
 
@@ -252,6 +254,7 @@
 - (void) didFinishPlayingAudio:(APPAudio*)audio
 {
     [self fireEvent:@"finish" withAudio:audio];
+    [self makeRestCall:audio.id withEvent:@"finish"];
 }
 
 /**
@@ -265,33 +268,6 @@
 {
     [self fireEvent:@"stop" withAudio:audio];
 }
-
-//-(void)didFinishPlayingAudio{
-//    NSLog(@"didFinishPlayingSong");
-//
-//    if ([self.webView isKindOfClass:[UIWebView class]]) {
-//        [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:@"if(window && window.MediaPlayer){ window.MediaPlayer.ended() }"];
-//    }
-//
-//    //Sends trackid
-//    if(![trackingUrl  isEqual: @"test"]){
-//        NSLog(@"play tracking");
-//        NSString *currentTrack = @"";//[audioPlayer getCurrentTrack];
-//        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-//        [request setHTTPMethod:@"GET"];
-//        [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@", trackingUrl, currentTrack]]];
-//
-//        NSError *error = [[NSError alloc] init];
-//        NSHTTPURLResponse *responseCode = nil;
-//
-//        //NSData *oResponseData =
-//        [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
-//
-//        if([responseCode statusCode] != 200){
-//            NSLog(@"Error getting %@, HTTP status code %li", trackingUrl, (long)[responseCode statusCode]);
-//        }
-//    }
-//}
 
 #pragma mark -
 #pragma mark Helper
@@ -337,6 +313,31 @@
           @"cordova.plugins.audioPlayer.fireEvent('%@', %@)", event, song];
 
     [self.commandDelegate evalJs:js];
+}
+
+
+/**
+ * Make REST call.
+ *
+ * @param [ NSString* ] trackId the trackId of current song.
+ * @param [ NSString* ] eventType the type of the triggered event.
+ *
+ * @return [ Void ]
+ */
+- (void) makeRestCall:(NSString*)trackId withEvent:(NSString*)eventType
+{
+    if (![trackingUrl isEqualToString:@""] ) {
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+        
+        [request setHTTPMethod:@"POST"];
+        [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&trackId=%@&eventType=%@", trackingUrl, trackId, eventType]]];
+
+        NSError *error = [[NSError alloc] init];
+        NSHTTPURLResponse *responseCode = nil;
+
+        [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+
+    }
 }
 
 @end
