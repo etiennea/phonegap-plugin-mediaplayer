@@ -48,6 +48,7 @@
 -(void)fadeOutVolume;
 -(void)fadeInVolume;
 
+@property (readonly, getter=getNextAudio) APPAudio* nextAudio;
 @property (readonly, getter=getCurrentAudio) APPAudio* currentAudio;
 @property (nonatomic, assign) id<APPAudioPlayerDelegate> delegate;
 

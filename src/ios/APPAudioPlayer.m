@@ -192,6 +192,20 @@
 }
 
 /**
+ * @abstract Get the next song if it's existing.
+ *
+ * @return [ APPAudio ]
+ */
+- (APPAudio*) getNextAudio
+{
+    if([player.items count]>1) {
+        return [_songs valueForKey:player.items[1].description];
+    } else {
+        return nil;
+    }
+}
+
+/**
  * @abstract Add the song to the queue.
  *
  * @param [ APPAudio ] song The audio song to add to the queue.
@@ -534,6 +548,7 @@
     if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
         [self didStartPlayingAudio];
     }
+
 }
 
 @end

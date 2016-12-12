@@ -29,6 +29,8 @@
 #import "APPAudioPlayerPlugin.h"
 #import "APPAudio.h"
 
+#define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+
 @interface APPAudioPlayerPlugin()
 
 // Instance of the audio player which contains all implementation.
@@ -241,6 +243,7 @@
  */
 - (void) didPausePlayingAudio:(APPAudio*)audio
 {
+    [self makeRestCall:audio.id withEvent:@"pause"];
     [self fireEvent:@"pause" withAudio:audio];
 }
 
@@ -253,8 +256,14 @@
  */
 - (void) didFinishPlayingAudio:(APPAudio*)audio
 {
-    [self fireEvent:@"finish" withAudio:audio];
     [self makeRestCall:audio.id withEvent:@"finish"];
+    [self fireEvent:@"finish" withAudio:audio];
+    
+    APPAudio* nextAudio = audioPlayer.getNextAudio;
+    if ( nextAudio && SYSTEM_VERSION_LESS_THAN(@"10.0"))
+    {
+        [self didStartPlayingAudio:nextAudio];
+    }
 }
 
 /**
