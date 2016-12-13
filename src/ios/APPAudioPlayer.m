@@ -265,9 +265,7 @@
 {
     [player pause];
 
-    if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
-        [self didPausePlayingAudio];
-    }
+    [self didPausePlayingAudio];
 }
 
 /**
@@ -541,12 +539,15 @@
 
     if (!audio || SYSTEM_VERSION_LESS_THAN(@"10.0"))
         return;
+    
+    if ([keyPath isEqualToString:@"timeControlStatus"]) {
 
-    if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
-        [self didPausePlayingAudio];
-    } else
-    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
-        [self didStartPlayingAudio];
+        if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
+            //[self didPausePlayingAudio];
+        } else
+        if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
+            [self didStartPlayingAudio];
+        }
     }
 
 }
