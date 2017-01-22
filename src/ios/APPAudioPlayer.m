@@ -198,7 +198,7 @@
  */
 - (APPAudio*) getNextAudio
 {
-    if([player.items count]>1) {
+    if (player.items.count > 1) {
         return [_songs valueForKey:player.items[1].description];
     } else {
         return nil;
@@ -317,7 +317,12 @@
                           initWithAsset:asset];
 
     [_songs setValue:song forKey:item.description];
-    [player insertItem:item afterItem:NULL];
+
+    if (player.items.count == 0 && SYSTEM_VERSION_LESS_THAN(@"10.0")) {
+        player = [player initWithPlayerItem:item];
+    } else {
+        [player insertItem:item afterItem:player.items.lastObject];
+    }
 }
 
 /**
@@ -539,15 +544,15 @@
 
     if (!audio || SYSTEM_VERSION_LESS_THAN(@"10.0"))
         return;
-    
-    if ([keyPath isEqualToString:@"timeControlStatus"]) {
 
-        if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
-            //[self didPausePlayingAudio];
-        } else
-        if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
-            [self didStartPlayingAudio];
-        }
+    if (![keyPath isEqualToString:@"timeControlStatus"])
+        return;
+
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPaused) {
+        // [self didPausePlayingAudio];
+    } else
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying && player.status == AVPlayerStatusReadyToPlay) {
+        [self didStartPlayingAudio];
     }
 
 }
