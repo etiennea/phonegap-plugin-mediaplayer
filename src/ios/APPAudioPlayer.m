@@ -517,7 +517,7 @@
     NSNumber* typeEnd = [NSNumber numberWithInt:
                         AVAudioSessionInterruptionTypeEnded];
 
-    if (![interruptType isEqualToNumber:typeEnd])
+    if (player.rate == 0 || ![interruptType isEqualToNumber:typeEnd])
         return;
 
     [player play];
