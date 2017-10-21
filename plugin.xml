@@ -1,41 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    id="phonegap-plugin-mediaplayer"
-    version="1.0.0">
-    <name>MediaPlayer</name>
-    <description>PhoneGap MediaPlayer Plugin</description>
-    <license></license>
-    <keywords>phonegap,content sync</keywords>
-    <repo>https://github.com/etiennea/phonegap-plugin-mediaplayer</repo>
-    <issue>https://github.com/etiennea/phonegap-plugin-mediaplayer/issues</issue>
+<!--
+ * Copyright (c) 2013-2016 by appPlant GmbH. All rights reserved.
+ *
+ * @APPPLANT_LICENSE_HEADER_START@
+ *
+ * This file contains Original Code and/or Modifications of Original Code
+ * as defined in and that are subject to the Apache License
+ * Version 2.0 (the 'License'). You may not use this file except in
+ * compliance with the License. Please obtain a copy of the License at
+ * http://opensource.org/licenses/Apache-2.0/ and read it before using this
+ * file.
+ *
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ * Please see the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * @APPPLANT_LICENSE_HEADER_END@
+-->
 
-    <js-module src="www/index.js" name="MediaPlayer">
-        <clobbers target="window.MediaPlayer" />
+<plugin id="cordova-plugin-audioplayer"
+        xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        version="1.0.0-dev">
+
+    <name>AudioPlayer</name>
+
+    <description>Cordova AudioPlayer Plugin</description>
+
+    <license>Apache 2.0</license>
+
+    <keywords>cordova,content sync</keywords>
+
+    <repo>https://github.com/katzer/phonegap-plugin-mediaplayer.git</repo>
+
+    <issue>https://github.com/katzer/phonegap-plugin-mediaplayer/issues</issue>
+
+    <author>Sebastián Katzer, Etienne Adriaenssen, Vadim Fainshtein</author>
+
+    <!-- cordova -->
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+        <engine name="apple-ios" version=">=8.0" />
+    </engines>
+
+    <!-- interface -->
+    <js-module src="www/audioplayer.js" name="AudioPlayer">
+        <clobbers target="cordova.plugins.audioPlayer" />
     </js-module>
 
+    <!-- ios -->
     <platform name="ios">
-        <source-file src="src/ios/MediaPlayer.m" />
-        <header-file src="src/ios/MediaPlayer.h" />
-        <source-file src="src/ios/GBBackgroundAudioPlayer.m" />
-        <header-file src="src/ios/GBBackgroundAudioPlayer.h" />
- 
+
         <config-file target="config.xml" parent="/*">
-            <feature name="MediaPlayer">
-                <param name="ios-package" value="MediaPlayer" />
+            <feature name="AudioPlayer">
+                <param name="ios-package" value="APPAudioPlayerPlugin" />
             </feature>
         </config-file>
-        <framework src="AVFoundation.framework" />
-        <framework src="CoreAudio.framework" />
-        <framework src="MediaPlayer.framework" />
-        <framework src="AudioToolbox.framework" />
 
         <config-file target="*-Info.plist" parent="UIBackgroundModes">
            <array>
                <string>audio</string>
            </array>
        </config-file>
-       
+
+        <framework src="AVFoundation.framework" />
+        <framework src="CoreAudio.framework" />
+        <framework src="MediaPlayer.framework" />
+        <framework src="AudioToolbox.framework" />
+
+        <header-file src="src/ios/APPAudioPlayerPlugin.h" />
+        <source-file src="src/ios/APPAudioPlayerPlugin.m" />
+        <header-file src="src/ios/APPAudioPlayer.h" />
+        <source-file src="src/ios/APPAudioPlayer.m" />
+        <header-file src="src/ios/APPAudio.h" />
+        <source-file src="src/ios/APPAudio.m" />
+
    </platform>
+
 </plugin>
